@@ -3,17 +3,21 @@ FlutterApp/**/build/
 FlutterApp/**/.dart_tool/
 FlutterApp/**/.flutter-plugins
 FlutterApp/**/.flutter-plugins-dependencies
+FlutterApp/**/.packages
 
 # Android
 FlutterApp/**/.gradle/
 FlutterApp/**/.idea/
 FlutterApp/**/*.iml
 
-# ESP32
+# iOS
+FlutterApp/**/ios/Pods/
+FlutterApp/**/ios/DerivedData/
+
+# ESP32 (لو PlatformIO)
 ESP32/.pio/
 
 # OS
-*.swp
 .DS_Store
 Thumbs.db
 
