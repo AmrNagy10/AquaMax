@@ -1,0 +1,21 @@
+# Flutter
+FlutterApp/**/build/
+FlutterApp/**/.dart_tool/
+FlutterApp/**/.flutter-plugins
+FlutterApp/**/.flutter-plugins-dependencies
+
+# Android
+FlutterApp/**/.gradle/
+FlutterApp/**/.idea/
+FlutterApp/**/*.iml
+
+# ESP32
+ESP32/.pio/
+
+# OS
+*.swp
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
