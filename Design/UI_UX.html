@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#f5fafc",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#c64f00",
+                    "on-tertiary-fixed-variant": "#7c2e00",
+                    "tertiary-fixed": "#ffdbcc",
+                    "surface-bright": "#f5fafc",
+                    "secondary-fixed-dim": "#b6cad2",
+                    "inverse-surface": "#2c3133",
+                    "on-primary-container": "#fefcff",
+                    "surface": "#f5fafc",
+                    "error": "#ba1a1a",
+                    "primary": "#0058bc",
+                    "on-secondary-fixed-variant": "#374951",
+                    "tertiary": "#9e3d00",
+                    "on-surface": "#171c1e",
+                    "surface-container-low": "#eff4f6",
+                    "surface-container-high": "#e4e9eb",
+                    "on-secondary-fixed": "#0b1e24",
+                    "secondary": "#4f6169",
+                    "primary-fixed-dim": "#adc6ff",
+                    "inverse-on-surface": "#ecf2f4",
+                    "outline": "#717786",
+                    "on-surface-variant": "#414755",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#eaeff1",
+                    "secondary-container": "#d2e6ef",
+                    "on-primary-fixed": "#001a41",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb595",
+                    "on-tertiary-container": "#fffbff",
+                    "secondary-fixed": "#d2e6ef",
+                    "on-error": "#ffffff",
+                    "on-background": "#171c1e",
+                    "surface-container-highest": "#dee3e5",
+                    "outline-variant": "#c1c6d7",
+                    "on-primary-fixed-variant": "#004493",
+                    "inverse-primary": "#adc6ff",
+                    "surface-variant": "#dee3e5",
+                    "on-secondary-container": "#55676f",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-dim": "#d6dbdd",
+                    "surface-tint": "#005bc1",
+                    "on-tertiary-fixed": "#351000",
+                    "primary-container": "#0070eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5fafc;
+        }
+        h1, h2, h3, .font-manrope {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f5fafc]/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#0058bc] dark:text-[#0070eb]" data-icon="water_drop">water_drop</span>
+<h1 class="font-manrope font-bold text-lg text-[#171c1e] dark:text-white tracking-tight">Aquifer IQ</h1>
+</div>
+<div class="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full border border-green-100">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<span class="text-xs font-semibold text-green-700 tracking-tight">Connected</span>
+</div>
+</header>
+<main class="mt-20 px-6 space-y-6">
+<!-- Hero Section -->
+<section>
+<div class="mb-2">
+<span class="text-on-surface-variant font-medium text-sm tracking-wide uppercase">Real-time Analysis</span>
+<h2 class="text-3xl font-extrabold text-on-surface leading-tight mt-1">System Health</h2>
+</div>
+</section>
+<!-- Circular Gauges Grid - Updated to 4 Metrics -->
+<div class="grid grid-cols-2 gap-4">
+<!-- TDS Level Gauge -->
+<div class="surface-container-low rounded-[1.5rem] p-4 flex flex-col items-center justify-center relative overflow-hidden aspect-square">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+<div class="relative w-full h-full flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-primary-fixed" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="62" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="glass-card w-3/4 h-3/4 rounded-full flex flex-col items-center justify-center shadow-lg border border-white/40 z-10">
+<span class="font-manrope text-2xl font-extrabold text-primary">120</span>
+<span class="text-on-surface-variant font-bold text-[8px] mt-0.5">PPM</span>
+</div>
+</div>
+<div class="mt-2 text-center absolute bottom-3">
+<h3 class="font-manrope font-bold text-xs">TDS Level</h3>
+</div>
+</div>
+<!-- Purity Index Gauge -->
+<div class="surface-container-low rounded-[1.5rem] p-4 flex flex-col items-center justify-center relative overflow-hidden aspect-square">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary-container/20 to-transparent"></div>
+<div class="relative w-full h-full flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-primary-fixed" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="15" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="glass-card w-3/4 h-3/4 rounded-full flex flex-col items-center justify-center shadow-lg border border-white/40 z-10">
+<span class="font-manrope text-2xl font-extrabold text-on-surface">98</span>
+<span class="text-on-surface-variant font-bold text-[8px] mt-0.5">%</span>
+</div>
+</div>
+<div class="mt-2 text-center absolute bottom-3">
+<h3 class="font-manrope font-bold text-xs">Purity Index</h3>
+</div>
+</div>
+<!-- Temperature Gauge -->
+<div class="surface-container-low rounded-[1.5rem] p-4 flex flex-col items-center justify-center relative overflow-hidden aspect-square">
+<div class="absolute inset-0 bg-gradient-to-bl from-tertiary-container/10 to-transparent"></div>
+<div class="relative w-full h-full flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-primary-fixed" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-tertiary" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="180" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="glass-card w-3/4 h-3/4 rounded-full flex flex-col items-center justify-center shadow-lg border border-white/40 z-10">
+<span class="font-manrope text-2xl font-extrabold text-on-surface">22</span>
+<span class="text-on-surface-variant font-bold text-[8px] mt-0.5">°C</span>
+</div>
+</div>
+<div class="mt-2 text-center absolute bottom-3">
+<h3 class="font-manrope font-bold text-xs">Temperature</h3>
+</div>
+</div>
+<!-- Overall Quality Gauge -->
+<div class="surface-container-low rounded-[1.5rem] p-4 flex flex-col items-center justify-center relative overflow-hidden aspect-square">
+<div class="absolute inset-0 bg-gradient-to-tl from-green-100 to-transparent"></div>
+<div class="relative w-full h-full flex items-center justify-center">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-primary-fixed" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-green-500" cx="50%" cy="50%" fill="transparent" r="40%" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="10" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="glass-card w-3/4 h-3/4 rounded-full flex flex-col items-center justify-center shadow-lg border border-white/40 z-10">
+<span class="font-manrope text-2xl font-extrabold text-on-surface">A+</span>
+<span class="text-on-surface-variant font-bold text-[8px] mt-0.5">SCORE</span>
+</div>
+</div>
+<div class="mt-2 text-center absolute bottom-3">
+<h3 class="font-manrope font-bold text-xs">Quality Score</h3>
+</div>
+</div>
+</div>
+<!-- AI Feature Card -->
+<section class="relative group">
+<div class="surface-container rounded-[2rem] p-1 overflow-hidden">
+<div class="bg-surface-container-lowest rounded-[1.9rem] p-6 flex flex-col items-center gap-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
+<img alt="" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA47nAJnFI18-G-jfUqegRqPNdMtU3v2XDzyKQreeR76i0wJ_Iwr0D7Bxoij37oAtBivHUDEc9KTcyye0U9hTFw4My7c9eUItnC-zA3ZKa2SlzYH2MZq26LKKv2iLxQ6MZgV3LDwdNMzcW0Fr879IEy2O9EhH-g_W3lB6bvac-EdJ8E3QNSIMHKMyKQzb1gC6H0Wui3t8GSpsYFG6LReU5vNx05NcVLs5ydMI2JUM4oyRBNU0daE7y1twbTDtlk6pdz549dInw_N4lW"/>
+</div>
+<div class="flex-1 space-y-3 relative z-10 text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">AI Intelligence</span>
+</div>
+<h3 class="text-xl font-bold font-manrope">Deep Visual Analysis</h3>
+<p class="text-on-surface-variant text-xs max-w-xs mx-auto">
+                            Detect micro-particles and sediment not visible to the naked eye with your camera.
+                        </p>
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold py-3.5 px-8 rounded-full flex items-center justify-center gap-3 shadow-[0_12px_32px_-4px_rgba(0,88,188,0.25)] transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span>Visual Water Analysis</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Vitality Sparkline -->
+<section class="surface-container-low rounded-[2rem] p-6 space-y-4">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="font-manrope font-bold text-on-surface">24h History</h3>
+<p class="text-xs text-on-surface-variant">Sensor stability: 99.9%</p>
+</div>
+<span class="text-primary font-bold text-sm">+2.4%</span>
+</div>
+<div class="h-16 w-full flex items-end gap-1 px-2">
+<div class="flex-1 bg-primary/20 h-[40%] rounded-full"></div>
+<div class="flex-1 bg-primary/20 h-[55%] rounded-full"></div>
+<div class="flex-1 bg-primary/20 h-[45%] rounded-full"></div>
+<div class="flex-1 bg-primary/40 h-[65%] rounded-full"></div>
+<div class="flex-1 bg-primary/40 h-[70%] rounded-full"></div>
+<div class="flex-1 bg-primary/60 h-[60%] rounded-full"></div>
+<div class="flex-1 bg-primary/80 h-[85%] rounded-full"></div>
+<div class="flex-1 bg-primary h-[95%] rounded-full"></div>
+<div class="flex-1 bg-primary/80 h-[75%] rounded-full"></div>
+<div class="flex-1 bg-primary/60 h-[80%] rounded-full"></div>
+<div class="flex-1 bg-primary/40 h-[65%] rounded-full"></div>
+<div class="flex-1 bg-primary h-[90%] rounded-full"></div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-t-3xl shadow-[0_12px_32px_-4px_rgba(0,88,188,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#0058bc] dark:text-[#0070eb] bg-[#d8e2ff]/30 dark:bg-[#0058bc]/20 rounded-2xl px-5 py-2 transition-transform duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#414755] dark:text-slate-400 px-5 py-2 hover:text-[#0058bc] transition-transform duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-1">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#414755] dark:text-slate-400 px-5 py-2 hover:text-[#0058bc] transition-transform duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-1">Settings</span>
+</a>
+</nav>
+</body></html>
