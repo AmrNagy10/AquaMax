@@ -36,7 +36,11 @@ ESP32 Sensors → BLE → Flutter App → GPT-4o Vision → AI Insights
 5. Unified data is sent to GPT-4o Vision for intelligent analysis.
 
 ---
-
+## Circuit Design
+<p align="center">
+  <img src="Design/CircuitDesign.png" width="50%"/>
+</p>
+---
 ## ⚙️ Hardware Layer (ESP32)
 
 The ESP32 acts as the edge device responsible for:
