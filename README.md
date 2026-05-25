@@ -70,9 +70,9 @@ Built using Flutter.
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="Design/screenshot_dashboard.png" width="30%"/>
-  <img src="Design/screenshot_reports.png" width="30%"/>
-  <img src="Design/screenshot_settings.png" width="30%"/>
+  <img src="Design/screenshot_dashboard.jpeg" width="30%"/>
+  <img src="Design/screenshot_reports.jpeg" width="30%"/>
+  <img src="Design/screenshot_settings.jpeg" width="30%"/>
 </p>
 
 ### Features
