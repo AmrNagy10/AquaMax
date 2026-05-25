@@ -67,6 +67,14 @@ The ESP32 acts as the edge device responsible for:
 
 Built using Flutter.
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="Design/screenshot_dashboard.png" width="30%"/>
+  <img src="Design/screenshot_reports.png" width="30%"/>
+  <img src="Design/screenshot_settings.png" width="30%"/>
+</p>
+
 ### Features
 
 - Real-time BLE communication
