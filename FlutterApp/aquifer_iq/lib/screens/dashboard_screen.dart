@@ -13,7 +13,14 @@ import '../services/reports_service.dart';
 import '../services/Scoring_Engine.dart';
 import '../models/app_mode.dart';
 import '../models/score_result.dart';
+import '../models/farm_profile.dart';
+import '../services/farm_profile_service.dart';
 import '../widgets/gauge_widget.dart';
+import '../widgets/farm_profile_setup_sheet.dart';
+
+/// نتيجة اختيار المستخدم في وضع Agricultural: يصور ورقة، أو يكمل بالحساسات بس.
+/// null (لو الـ sheet اتقفلت من غير اختيار) = إلغاء العملية بالكامل.
+enum FieldPhotoChoice { takePhoto, skip }
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -28,35 +35,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isAnalyzing = false;
   int _currentIndex = 0;
 
+  /// لو المستخدم بيحول لـ Agricultural لأول مرة (مفيش profile محفوظ)،
+  /// نعرض الـ setup sheet قبل ما نكمل. لو راجع لـ Home، أو عنده profile
+  /// بالفعل، بيتحول على طول من غير أي مقاطعة.
+  Future<void> _handleModeToggle(ModeService modeService, AppMode currentMode) async {
+    if (currentMode == AppMode.home) {
+      await modeService.setMode(AppMode.agricultural);
+      if (!mounted) return;
+      final farmProfile = context.read<FarmProfileService>();
+      if (!farmProfile.hasProfile) {
+        await showFarmProfileSetupSheet(context);
+      }
+    } else {
+      await modeService.setMode(AppMode.home);
+    }
+  }
+
+  /// يفتح الكاميرا مع تجميد قراءات الـ BLE أثناء الالتقاط، ويرجّع الملف
+  /// أو null لو المستخدم لغى. القراءات بترجع تتحدث فورًا في الحالتين.
+  Future<File?> _capturePhoto(BleService ble) async {
+    ble.startCapture();
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      return image == null ? null : File(image.path);
+    } finally {
+      ble.endCapture();
+    }
+  }
+
   Future<void> _runVisualAnalysis(SensorData data) async {
     final ble = context.read<BleService>();
+    final mode = context.read<ModeService>().currentMode;
+
     try {
-      // 1) تجميد القراءات قبل فتح الكاميرا
-      ble.startCapture();
+      File? image;
 
-      // 2) فتح الكاميرا والتقاط الصورة
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (mode == AppMode.agricultural) {
+        // في الوضع الزراعي: الصورة اختيارية، والأرقام كافية لوحدها للتحليل.
+        final choice = await _showFieldPhotoChoiceSheet();
+        if (choice == null) return; // المستخدم قفل الـ sheet = إلغاء كامل
+        if (choice == FieldPhotoChoice.takePhoto) {
+          image = await _capturePhoto(ble);
+          if (image == null) return; // فتح الكاميرا وألغى = إلغاء كامل برضه
+        }
+        // choice == skip → image تفضل null، ونكمل بالحساسات بس
+      } else {
+        // Home: زي ما هو بالظبط — الصورة إجبارية (كوباية المياه هي المرجع البصري)
+        image = await _capturePhoto(ble);
+        if (image == null) return;
+      }
 
-      // 3) إرجاع تحديث القراءات فوراً (سواء التقط صورة أو لا)
-      ble.endCapture();
-
-      if (image == null) return;
-
-      // 4) استخدام الـ snapshot اللي اتجمد قبل الكاميرا
       final snapshot = ble.sensorData;
       setState(() => _isAnalyzing = true);
 
       final result = await _aiService.analyzeWaterImage(
-        imageFile: File(image.path),
+        imageFile: image,
         tds: snapshot.tds,
         purity: snapshot.purity,
         temperature: snapshot.temperature,
         ph: snapshot.ph,
-        mode: context.read<ModeService>().currentMode,
+        mode: mode,
       );
       if (!mounted) return;
 
-      final scoreRes = ScoringEngine.calculateScore(snapshot);
+      // ملحوظة: النسخة الأصلية كانت بتنادي calculateScore من غير mode،
+      // يعني كانت بتحسب score التقرير المحفوظ بأوزان Home دايمًا حتى لو
+      // المستخدم في Agricultural. صلحتها هنا عشان تطابق الـ mode الفعلي.
+      final scoreRes = ScoringEngine.calculateScore(snapshot, mode: mode);
 
       context.read<ReportsService>().addReport(WaterAnalysisReport(
         date: DateTime.now(),
@@ -65,13 +110,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         temperature: snapshot.temperature,
         ph: snapshot.ph,
         score: scoreRes.numericScore,
-        imageFile: File(image.path),
+        imageFile: image,
         aiResult: result,
       ));
       setState(() => _currentIndex = 2);
     } catch (e) {
-      // حتى في حالة الخطأ نرجع تحديث القراءات
-      ble.endCapture();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ أثناء التحليل: $e'), backgroundColor: Colors.redAccent),
@@ -80,6 +123,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ble.endCapture(); // ضمان إن القراءات ترجع تتحدث في كل الحالات
       if (mounted) setState(() => _isAnalyzing = false);
     }
+  }
+
+  /// Bottom sheet بتسأل المستخدم في الوضع الزراعي: يصور ورقة عشان يفحص
+  /// علامات الإجهاد الملحي، أو يكمل بالحساسات بس. بترجّع null لو قفلها
+  /// من غير اختيار (يعني إلغاء العملية بالكامل).
+  Future<FieldPhotoChoice?> _showFieldPhotoChoiceSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF161B22) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subtitleColor = isDark ? Colors.white54 : Colors.grey[600]!;
+
+    return showModalBottomSheet<FieldPhotoChoice>(
+      context: context,
+      backgroundColor: cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: subtitleColor.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Text(
+                  "Add a leaf photo?",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Photographing a leaf lets the AI check for salt-stress symptoms "
+                      "alongside your sensor readings. This step is optional.",
+                  style: TextStyle(fontSize: 13, color: subtitleColor),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(sheetContext, FieldPhotoChoice.takePhoto),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF639922),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                  icon: const Icon(Icons.camera_alt_rounded),
+                  label: const Text("Photograph a leaf"),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(sheetContext, FieldPhotoChoice.skip),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    side: BorderSide(color: subtitleColor.withOpacity(0.4)),
+                  ),
+                  child: Text("Skip — use sensors only", style: TextStyle(color: textColor)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -162,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Row(children: [
                     // Mode toggle button
                     GestureDetector(
-                      onTap: modeService.toggleMode,
+                      onTap: () => _handleModeToggle(modeService, currentMode),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                         decoration: BoxDecoration(

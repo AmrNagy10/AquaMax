@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/score_result.dart';
+import '../../models/farm_profile.dart';
 import '../services/ble_service.dart';
 
 /// Abstract interface for all scoring strategies.
@@ -18,8 +19,10 @@ abstract class ScoreCalculator {
   Map<String, double> get weights;
 
   /// Calculate the sub-scores for each metric from raw sensor data.
+  /// [farmProfile] اختياري — لو موجود، Agricultural strategy بتستخدمه
+  /// لتعديل عتبات TDS حسب تحمّل المحصول المحدد بدل عتبة عامة ثابتة.
   /// Returns a map with keys 'tds', 'purity', 'ph', 'temp'.
-  Map<String, double> calculateSubScores(SensorData data);
+  Map<String, double> calculateSubScores(SensorData data, {FarmProfile? farmProfile});
 
   /// Returns the grade (A+, A, B, C, D) based on the final numeric score.
   String getGrade(double score);
@@ -34,5 +37,5 @@ abstract class ScoreCalculator {
   List<String> getTips(double score);
 
   /// Main entry point: takes raw sensor data and returns a full score result.
-  WaterScoreResult calculate(SensorData data, double aiMultiplier);
+  WaterScoreResult calculate(SensorData data, double aiMultiplier, {FarmProfile? farmProfile});
 }

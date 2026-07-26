@@ -13,11 +13,14 @@ abstract class AiPromptStrategy {
   /// Build the full prompt string for the given sensor data.
   /// This includes sensor readings, scientific standards, JSON format,
   /// and output rules — all tailored to the specific mode.
+  /// [hasImage] بتحدد هل فيه صورة اتصورت وهتتبعت مع الـ request فعليًا،
+  /// عشان الـ prompt يعدّل صياغته (يسأل عن تفاصيل بصرية أو يتجاهلها).
   String buildPrompt({
     required double tds,
     required double purity,
     required double temperature,
     required double? ph,
+    required bool hasImage,
   });
 
   /// Build the system message that sets the AI's role.

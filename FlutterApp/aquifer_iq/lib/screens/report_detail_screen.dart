@@ -68,16 +68,36 @@ class ReportDetailScreen extends StatelessWidget {
             const SizedBox(height: 25),
 
             // Image Preview (if exists)
-            if (report.imageFile.existsSync())
+            // Image Preview — لو مفيش صورة (تقرير Sensors-only) بنعرض placeholder واضح
+// بدل ما نسيب فراغ صامت يفهمه المستخدم غلط إنه "باج".
+            if (report.imageFile != null && report.imageFile!.existsSync())
               Container(
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   image: DecorationImage(
-                    image: FileImage(report.imageFile),
+                    image: FileImage(report.imageFile!),
                     fit: BoxFit.cover,
                   ),
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: (subtitleColor ?? Colors.grey).withOpacity(0.25)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.eco_outlined, color: subtitleColor, size: 20),
+                    const SizedBox(width: 8),
+                    Text("Sensors-only reading — no photo attached", style: TextStyle(color: subtitleColor, fontSize: 13)),
+                  ],
                 ),
               ),
             const SizedBox(height: 25),

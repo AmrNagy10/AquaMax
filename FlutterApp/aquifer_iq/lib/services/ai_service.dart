@@ -51,7 +51,7 @@ class AiService {
   };
 
   Future<AiAnalysisResult> analyzeWaterImage({
-    required File imageFile,
+    required File? imageFile, // nullable الآن — Agricultural mode ممكن يشتغل بالحساسات بس
     required double tds,
     required double purity,
     required double temperature,
@@ -61,16 +61,29 @@ class AiService {
     try {
       // Get the appropriate strategy for this mode
       final strategy = _promptStrategies[mode] ?? _promptStrategies[AppMode.home]!;
-
-      final imageBytes = await imageFile.readAsBytes();
-      final base64Image = base64Encode(imageBytes);
+      final bool hasImage = imageFile != null;
 
       final prompt = strategy.buildPrompt(
         tds: tds,
         purity: purity,
         temperature: temperature,
         ph: ph,
+        hasImage: hasImage,
       );
+
+      // نبني محتوى الرسالة ديناميكيًا: النص دايمًا موجود، وصورة الـ base64
+      // بتتضاف بس لو فعليًا اتصورت.
+      final List<Map<String, dynamic>> userContent = [
+        {"type": "text", "text": prompt},
+      ];
+      if (hasImage) {
+        final imageBytes = await imageFile.readAsBytes();
+        final base64Image = base64Encode(imageBytes);
+        userContent.add({
+          "type": "image_url",
+          "image_url": {"url": "data:image/jpeg;base64,$base64Image"}
+        });
+      }
 
       final response = await http.post(
         Uri.parse(_endpoint),
@@ -87,13 +100,7 @@ class AiService {
             },
             {
               "role": "user",
-              "content": [
-                {"type": "text", "text": prompt},
-                {
-                  "type": "image_url",
-                  "image_url": {"url": "data:image/jpeg;base64,$base64Image"}
-                }
-              ]
+              "content": userContent,
             }
           ],
           "max_tokens": 1000,

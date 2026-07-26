@@ -16,6 +16,7 @@ class HomePromptStrategy implements AiPromptStrategy {
     required double purity,
     required double temperature,
     required double? ph,
+    required bool hasImage, // الصورة إجبارية في Home، فمش بتغيّر الصياغة هنا
   }) {
     return """
 You are a strict, data-driven water quality expert certified under ISO 17025.

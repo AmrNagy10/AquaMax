@@ -14,7 +14,7 @@ class WaterAnalysisReport {
   final double temperature;
   final double ph;
   final double score;
-  final File imageFile;
+  final File? imageFile; // nullable — تقارير Agricultural من غير صورة (sensors-only)
   final AiAnalysisResult aiResult;
 
   WaterAnalysisReport({
@@ -35,7 +35,7 @@ class WaterAnalysisReport {
     'temperature': temperature,
     'ph': ph,
     'score': score,
-    'imagePath': imageFile.path,
+    'imagePath': imageFile?.path, // null لو مفيش صورة
     'aiResult': aiResult.toJson(),
   };
 
@@ -46,7 +46,7 @@ class WaterAnalysisReport {
     temperature: (json['temperature'] as num).toDouble(),
     ph: (json['ph'] as num?)?.toDouble() ?? 7.0,
     score: (json['score'] as num?)?.toDouble() ?? 0.0,
-    imageFile: File(json['imagePath']),
+    imageFile: json['imagePath'] != null ? File(json['imagePath']) : null,
     aiResult: AiAnalysisResult.fromJson(json['aiResult']),
   );
 }

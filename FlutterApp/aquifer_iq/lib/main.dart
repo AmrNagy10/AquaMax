@@ -5,6 +5,7 @@ import 'screens/dashboard_screen.dart';
 import 'services/mode_service.dart';
 import 'services/reports_service.dart';
 import 'services/theme_service.dart';
+import 'services/farm_profile_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ReportsService()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
         ChangeNotifierProvider(create: (_) => ModeService()),
+        ChangeNotifierProvider(create: (_) => FarmProfileService()),
       ],
       child: const AquaMaxApp(), // ✅ تم التعديل
     ),

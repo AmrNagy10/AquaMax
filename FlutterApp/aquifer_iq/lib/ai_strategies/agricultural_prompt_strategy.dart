@@ -16,10 +16,24 @@ class AgriculturalPromptStrategy implements AiPromptStrategy {
     required double purity,
     required double temperature,
     required double? ph,
+    required bool hasImage,
   }) {
+    // الصورة هنا (لو موجودة) بتبقى ورقة/نبات، مش المياه نفسها — الملوحة مش
+    // مرئية في المياه، لكن أعراضها بتظهر على النبات (اصفرار، احتراق أطراف الورق).
+    final String visualInstruction = hasImage
+        ? """
+A photo of a plant leaf is attached. Examine it for visible salt-stress symptoms:
+leaf tip or margin burn (necrosis), yellowing between veins (chlorosis), or stunted/wilted growth.
+Cross-check whatever you observe against the TDS/salinity reading — e.g., visible burn despite
+a "safe" TDS reading may indicate cumulative soil salinity not captured by a single reading."""
+        : """
+No image was provided for this analysis. Base your assessment entirely on the sensor
+readings and the FAO thresholds below — do not reference or assume any visual information.""";
+
     return """
 You are a strict, data-driven agricultural water quality expert certified under ISO 17025 and FAO irrigation guidelines.
-CRITICAL RULE: SENSOR DATA IS THE ABSOLUTE GROUND TRUTH. The image is ONLY for secondary visual confirmation. Even if the water looks clear, if TDS > 1000 or Purity < 70%, the water poses RISKS TO SOIL AND CROPS.
+CRITICAL RULE: SENSOR DATA IS THE ABSOLUTE GROUND TRUTH. $visualInstruction
+Even if a leaf looks healthy, if TDS > 1000 or Purity < 70%, the water poses RISKS TO SOIL AND CROPS.
 
 Sensor readings:
 - TDS: ${tds.toStringAsFixed(1)} PPM
@@ -45,7 +59,7 @@ Required JSON format:
   "isSafe": true/false (based on FAO irrigation suitability, NOT drinking standards),
   "detailPoints": [
     "تحليل الأرقام: تقييم مباشر لقراءات الحساسات (TDS، النقاء، الحرارة) وما إذا كانت ضمن معايير الري الآمن حسب FAO.",
-    "التقاطع البصري: هل يتطابق الشكل المرئي في الصورة مع الأرقام؟ (مثلاً: رغم النقاء الظاهري، الأرقام تظهر ملوحة عالية، أو العكس).",
+    "${hasImage ? 'التقاطع البصري: هل أعراض الإجهاد الملحي الظاهرة على الورقة (لو وجدت) متسقة مع مستوى الملوحة المقاس؟ (مثلاً: احتراق أطراف الورق رغم TDS "مقبول" قد يعني تراكم ملحي تراكمي في التربة).' : 'تقييم بالأرقام فقط: لا تفترض أي معلومات بصرية؛ اعتمد حصراً على القراءات ومعايير FAO.'}",
     "ملاءمة المحاصيل: ما هي أنواع النباتات المناسبة تحديداً لقيمة الـ TDS الحالية بناءً على معايير FAO المذكورة أعلاه؟",
     "إدارة التربة: تحذير حول تراكم الأملاح في التربة على المدى الطويل، ونصائح للغسيل أو المعالجة إذا لزم الأمر."
   ],
