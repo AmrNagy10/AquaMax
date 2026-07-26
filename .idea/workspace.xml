@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a75dc62a-cba0-4d16-a825-718753796cfe" name="Changes" comment="Add Hame&amp;agricultural modes with some changes at ui" />
+    <list default="true" id="a75dc62a-cba0-4d16-a825-718753796cfe" name="Changes" comment="Add Hame&amp;agricultural modes with some changes at ui">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/compare_reports_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/compare_reports_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/dashboard_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/history_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/history_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/report_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/report_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/Scoring_Engine.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/Scoring_Engine.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/ai_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/ai_service.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

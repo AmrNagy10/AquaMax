@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import 'package:provider/provider.dart';
 import '../services/reports_service.dart';
 import '../services/mode_service.dart';
 import '../services/Scoring_Engine.dart';
 import '../models/app_mode.dart';
-=======
-=======
-import 'package:provider/provider.dart';
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
-import '../services/reports_service.dart';
-import '../services/mode_service.dart';
-import '../services/Scoring_Engine.dart';
-<<<<<<< HEAD
->>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
-=======
-import '../models/app_mode.dart';
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
 
 class CompareReportsScreen extends StatefulWidget {
   final WaterAnalysisReport report1;
@@ -52,22 +38,12 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6),
       appBar: AppBar(
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
         title: Consumer<ModeService>(
           builder: (context, modeService, child) => Text(
             modeService.currentMode == AppMode.agricultural ? "Irrigation Comparison" : "Comparison Results",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-<<<<<<< HEAD
-=======
-        title: const Text("Comparison Results", style: TextStyle(fontWeight: FontWeight.bold)),
->>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: textColor,
@@ -92,10 +68,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
             const SizedBox(height: 24),
 
             // ── Score Graph ──
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
             Consumer<ModeService>(
               builder: (context, modeService, child) {
                 final isAg = modeService.currentMode == AppMode.agricultural;
@@ -106,7 +78,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
                     const SizedBox(height: 12),
                     _buildScoreGraph(score1, score2, isDark, cardColor, textColor, subtitleColor),
                     const SizedBox(height: 24),
-<<<<<<< HEAD
 
                     // ── Detailed Comparison ──
                     Text(isAg ? "FIELD METRICS" : "DETAILED METRICS", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
@@ -119,34 +90,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
                 );
               },
             ),
-=======
-            Text("SCORE COMPARISON", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            _buildScoreGraph(score1, score2, isDark, cardColor, textColor, subtitleColor),
-            const SizedBox(height: 24),
-
-            // ── Detailed Comparison ──
-            Text("DETAILED METRICS", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            _buildMetricComparison("TDS", "${report1.tds.toStringAsFixed(0)} PPM", "${report2.tds.toStringAsFixed(0)} PPM", Icons.opacity, Colors.cyan, isDark, textColor, cardColor),
-            _buildMetricComparison("pH", report1.ph.toStringAsFixed(1), report2.ph.toStringAsFixed(1), Icons.science, ScoringEngine.getPhColor(report1.ph), isDark, textColor, cardColor),
-            _buildMetricComparison("Purity", "${report1.purity.toStringAsFixed(0)}%", "${report2.purity.toStringAsFixed(0)}%", Icons.clean_hands, Colors.green, isDark, textColor, cardColor),
-            _buildMetricComparison("Temperature", "${report1.temperature.toStringAsFixed(1)}°C", "${report2.temperature.toStringAsFixed(1)}°C", Icons.thermostat, Colors.blue, isDark, textColor, cardColor),
->>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
-=======
-
-                    // ── Detailed Comparison ──
-                    Text(isAg ? "FIELD METRICS" : "DETAILED METRICS", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    _buildMetricComparison(isAg ? "Salinity" : "TDS", "${report1.tds.toStringAsFixed(0)} PPM", "${report2.tds.toStringAsFixed(0)} PPM", Icons.opacity, Colors.cyan, isDark, textColor, cardColor),
-                    _buildMetricComparison("pH", report1.ph.toStringAsFixed(1), report2.ph.toStringAsFixed(1), Icons.science, ScoringEngine.getPhColor(report1.ph), isDark, textColor, cardColor),
-                    _buildMetricComparison(isAg ? "Moisture" : "Purity", "${report1.purity.toStringAsFixed(0)}%", "${report2.purity.toStringAsFixed(0)}%", isAg ? Icons.grass : Icons.clean_hands, isAg ? const Color(0xFF639922) : Colors.green, isDark, textColor, cardColor),
-                    _buildMetricComparison("Temperature", "${report1.temperature.toStringAsFixed(1)}°C", "${report2.temperature.toStringAsFixed(1)}°C", Icons.thermostat, Colors.blue, isDark, textColor, cardColor),
-                  ],
-                );
-              },
-            ),
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
             const SizedBox(height: 24),
 
             // ── Change Summary ──
@@ -172,10 +115,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
                     size: 40,
                   ),
                   const SizedBox(height: 8),
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   Consumer<ModeService>(
                     builder: (context, modeService, child) => Text(
                       isImprovement
@@ -186,17 +125,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
                         fontWeight: FontWeight.bold,
                         color: isImprovement ? const Color(0xFF639922) : const Color(0xFFE24B4A),
                       ),
-<<<<<<< HEAD
-=======
-                  Text(
-                    isImprovement ? "Quality Improved" : "Quality Declined",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isImprovement ? const Color(0xFF639922) : const Color(0xFFE24B4A),
->>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -204,10 +132,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
                     "Score changed by ${diff >= 0 ? '+' : ''}${diff.toStringAsFixed(1)} points",
                     style: TextStyle(fontSize: 16, color: textColor),
                   ),
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   const SizedBox(height: 4),
                   Consumer<ModeService>(
                     builder: (context, modeService, child) => Text(
@@ -217,11 +141,6 @@ class _CompareReportsScreenState extends State<CompareReportsScreen> {
                       style: TextStyle(fontSize: 13, color: subtitleColor),
                     ),
                   ),
-<<<<<<< HEAD
-=======
->>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
-=======
->>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                 ],
               ),
             ),
