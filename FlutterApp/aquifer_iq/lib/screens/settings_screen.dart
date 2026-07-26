@@ -186,7 +186,7 @@ class SettingsScreen extends StatelessWidget {
             // ── Footer ──
             Center(
               child: Text(
-                "AquaMax • Made with ❤️",
+                "AquaMax • Made by Brain",
                 style: TextStyle(fontSize: 12, color: subtitleColor),
               ),
             ),
