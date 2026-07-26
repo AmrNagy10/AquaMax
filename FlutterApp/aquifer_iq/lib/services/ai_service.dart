@@ -45,6 +45,7 @@ class AiService {
     required double tds,
     required double purity,
     required double temperature,
+    double? ph,
   }) async {
     try {
       final imageBytes = await imageFile.readAsBytes();
@@ -57,6 +58,7 @@ CRITICAL RULE: SENSOR DATA IS THE ABSOLUTE GROUND TRUTH. The image is ONLY for s
 Sensor readings:
 - TDS: ${tds.toStringAsFixed(1)} PPM
 - Purity: ${purity.toStringAsFixed(1)}%
+- pH: ${ph?.toStringAsFixed(1) ?? 'N/A'}
 - Temperature: ${temperature.toStringAsFixed(1)}°C
 
 Scientific Standards for Evaluation:
@@ -94,7 +96,7 @@ Rules:
           'Authorization': 'Bearer $_githubToken',
         },
         body: jsonEncode({
-          "model": "gpt-4o",
+          "model": "gpt-4.1-mini",
           "messages": [
             {
               "role": "system",
@@ -112,7 +114,7 @@ Rules:
             }
           ],
           "max_tokens": 1000,
-          "temperature": 0.0, // 🚀 تقليل الحرارة لـ 0.0 لضمان المنطق الصارم وعدم التأليف
+          "temperature": 0.0,
           "response_format": {"type": "json_object"}
         }),
       );

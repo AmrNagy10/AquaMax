@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,11 +10,13 @@ class SensorData {
   final double tds;
   final double purity;
   final double temperature;
+  final double ph; // New field
 
   SensorData({
     required this.tds,
     required this.purity,
     required this.temperature,
+    required this.ph,
   });
 
   factory SensorData.fromJson(Map<String, dynamic> json) {
@@ -21,12 +24,12 @@ class SensorData {
       tds:         (json['tds']    ?? 0).toDouble(),
       purity:      (json['purity'] ?? 0).toDouble(),
       temperature: (json['temp']   ?? 0).toDouble(),
+      ph:          (json['ph']     ?? 7.0).toDouble(), // Default to neutral pH
     );
   }
 
-  // ميثود مساعدة لإنشاء بيانات صفرية
   factory SensorData.empty() {
-    return SensorData(tds: 0, purity: 0, temperature: 0);
+    return SensorData(tds: 0, purity: 0, temperature: 0, ph: 0);
   }
 }
 
@@ -38,19 +41,61 @@ class BleService extends ChangeNotifier {
   bool       _isConnected    = false;
   bool       _isScanning     = false;
   bool       _foundAndConnecting = false;
-  SensorData _sensorData     = SensorData.empty(); // القيمة الافتراضية
+  SensorData _sensorData     = SensorData.empty();
   String     _statusMessage  = "Not connected";
+
+  bool _isSimulationMode = false;
+  bool _isCapturing = false;
+  Timer? _simulationTimer;
 
   StreamSubscription? _scanResultsSub;
   StreamSubscription? _isScanningSubStream;
-  StreamSubscription? _connectionStateSub; // مضاف لمراقبة حالة الاتصال
+  StreamSubscription? _connectionStateSub;
 
   bool       get isConnected   => _isConnected;
   bool       get isScanning    => _isScanning || _foundAndConnecting;
   SensorData get sensorData    => _sensorData;
   String     get statusMessage => _statusMessage;
+  bool       get isSimulationMode => _isSimulationMode;
+  bool       get isCapturing      => _isCapturing;
+
+  void toggleSimulationMode() {
+    _isSimulationMode = !_isSimulationMode;
+    if (_isSimulationMode) {
+      _startSimulation();
+    } else {
+      _stopSimulation();
+      disconnect();
+    }
+    notifyListeners();
+  }
+
+  void _startSimulation() {
+    _stopSimulation();
+    _isConnected = true;
+    _statusMessage = "Simulation Mode";
+
+    _simulationTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      // إذا كان في وضع التقاط صورة، لا نحدث البيانات لحين انتهاء الالتقاط
+      if (_isCapturing) return;
+      final random = Random();
+      _sensorData = SensorData(
+        tds: 100 + random.nextDouble() * 900,
+        purity: 60 + random.nextDouble() * 40,
+        temperature: 15 + random.nextDouble() * 20,
+        ph: 6.5 + random.nextDouble() * 2.0, // 6.5 to 8.5 (Common range)
+      );
+      notifyListeners();
+    });
+  }
+
+  void _stopSimulation() {
+    _simulationTimer?.cancel();
+    _simulationTimer = null;
+  }
 
   Future<void> startScan() async {
+    if (_isSimulationMode) return;
     if (_isScanning || _isConnected || _foundAndConnecting) return;
 
     // 1. تصفير البيانات عند بدء بحث جديد
@@ -128,11 +173,11 @@ class BleService extends ChangeNotifier {
           _foundAndConnecting = false;
           _statusMessage      = "Disconnected";
 
-          // 🔑 التعديل المطلوب: تصفير القراءات فور الانقطاع
+          // تصفير القراءات فور الانقطاع
           _sensorData = SensorData.empty();
 
           notifyListeners();
-          debugPrint("💔 Disconnected: Data has been reset.");
+          debugPrint("Disconnected: Data has been reset.");
         }
       });
 
@@ -166,9 +211,9 @@ class BleService extends ChangeNotifier {
       _isScanning         = false;
       _foundAndConnecting = false;
       _statusMessage      = "Connection failed";
-      _sensorData         = SensorData.empty(); // تصفير في حالة فشل الاتصال برضه
+      _sensorData         = SensorData.empty();
       notifyListeners();
-      debugPrint("❌ Connect Error: $e");
+      debugPrint("Connect Error: $e");
     }
   }
 
@@ -182,23 +227,46 @@ class BleService extends ChangeNotifier {
       await c.setNotifyValue(true);
 
       c.lastValueStream.listen((value) {
-        if (value.isEmpty || !_isConnected) return; // لا تقبل داتا لو الاتصال مقطوع
+        if (value.isEmpty || !_isConnected) return;
+        // إذا كان في وضع التقاط صورة، لا نحدث البيانات لحين انتهاء الالتقاط
+        if (_isCapturing) return;
         try {
           final raw  = utf8.decode(value);
           final json = jsonDecode(raw) as Map<String, dynamic>;
           _sensorData = SensorData.fromJson(json);
           notifyListeners();
         } catch (e) {
-          debugPrint("❌ Parse error: $e");
+          debugPrint("Parse error: $e");
         }
       });
 
     } catch (e) {
-      debugPrint("❌ setNotifyValue error: $e");
+      debugPrint("setNotifyValue error: $e");
     }
   }
 
+  /// يجمد القراءات قبل التقاط الصورة
+  void startCapture() {
+    _isCapturing = true;
+    notifyListeners();
+  }
+
+  /// يرجع تحديث القراءات بعد التقاط الصورة
+  void endCapture() {
+    _isCapturing = false;
+    notifyListeners();
+  }
+
   Future<void> disconnect() async {
+    if (_isSimulationMode) {
+      _stopSimulation();
+      _isConnected = false;
+      _statusMessage = "Not connected";
+      _sensorData = SensorData.empty();
+      notifyListeners();
+      return;
+    }
+
     await FlutterBluePlus.stopScan();
     await _scanResultsSub?.cancel();
     await _isScanningSubStream?.cancel();
@@ -209,12 +277,13 @@ class BleService extends ChangeNotifier {
     _isScanning         = false;
     _foundAndConnecting = false;
     _statusMessage      = "Not connected";
-    _sensorData         = SensorData.empty(); // تصفير يدوي عند ضغط زر disconnect
+    _sensorData         = SensorData.empty();
     notifyListeners();
   }
 
   @override
   void dispose() {
+    _simulationTimer?.cancel();
     _connectionStateSub?.cancel();
     disconnect();
     super.dispose();
