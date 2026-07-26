@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/reports_service.dart';
+import '../services/mode_service.dart';
+import '../models/app_mode.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -24,20 +26,28 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final reportsService = context.watch<ReportsService>();
     final history = reportsService.history;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentMode = context.watch<ModeService>().currentMode;
     final cardColor     = isDark ? const Color(0xFF161B22) : Colors.white;
     final bgColor       = isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6);
     // ✅ إصلاح dark mode: textColor و subtitleColor متكيفين
     final textColor     = isDark ? Colors.white : Colors.black87;
     final subtitleColor = isDark ? Colors.white54 : Colors.grey[700]!;
 
+    final isAgricultural = currentMode == AppMode.agricultural;
+    final appBarTitle = isAgricultural ? "Irrigation Reports" : "Water Reports & AI";
+    final emptyTitle = isAgricultural ? "No irrigation reports yet" : "No reports yet";
+    final emptySubtitle = isAgricultural ? "Start an Irrigation Scan in the Dashboard." : "Start a Visual Analysis in the Dashboard.";
+    final trendsTitle = isAgricultural ? "Irrigation Trends" : "History Trends";
+    final trendsCountLabel = isAgricultural ? "Analyses" : "Reports";
+
     if (history.isEmpty) {
       return Scaffold(
         backgroundColor: bgColor,
         appBar: AppBar(
-          title: Text("Water Reports & AI", style: TextStyle(fontWeight: FontWeight.w700, color: textColor)),
+          title: Text(appBarTitle, style: TextStyle(fontWeight: FontWeight.w700, color: textColor)),
           backgroundColor: Colors.transparent, elevation: 0, centerTitle: true,
         ),
-        body: _buildEmptyState(subtitleColor),
+        body: _buildEmptyState(subtitleColor, emptyTitle, emptySubtitle),
       );
     }
 
@@ -47,7 +57,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text("Water Reports & AI", style: TextStyle(fontWeight: FontWeight.w700, color: textColor)),
+        title: Text(appBarTitle, style: TextStyle(fontWeight: FontWeight.w700, color: textColor)),
         backgroundColor: Colors.transparent, elevation: 0, centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -56,14 +66,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSelectedReportCard(
-              selectedReport, safeIndex == 0, isDark, cardColor, textColor, subtitleColor,
+              selectedReport, safeIndex == 0, isDark, cardColor, textColor, subtitleColor, isAgricultural,
             ),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("History Trends", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
-                Text("${history.length} Reports", style: TextStyle(fontSize: 14, color: Colors.blue[800], fontWeight: FontWeight.bold)),
+                Text(trendsTitle, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
+                Text("${history.length} $trendsCountLabel", style: TextStyle(fontSize: 14, color: Colors.blue[800], fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 4),
@@ -209,6 +219,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildSelectedReportCard(
       WaterAnalysisReport report, bool isLatest, bool isDark,
       Color cardColor, Color textColor, Color subtitleColor,
+      bool isAgricultural,
       ) {
     final aiResult = report.aiResult;
     return Container(
@@ -224,30 +235,49 @@ class _ReportsScreenState extends State<ReportsScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(children: [
-              Icon(
-                aiResult.isSafe ? Icons.check_circle : Icons.warning_rounded,
-                color: aiResult.isSafe ? const Color(0xFF639922) : Colors.orange[800],
-                size: 28,
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(
+                    aiResult.isSafe
+                        ? Icons.check_circle
+                        : Icons.warning_rounded,
+                    color: aiResult.isSafe
+                        ? const Color(0xFF639922)
+                        : Colors.orange[800],
+                    size: 28,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      isLatest
+                          ? (isAgricultural
+                          ? "Latest Irrigation Analysis"
+                          : "Latest Analysis")
+                          : "Historical Record",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text(
-                isLatest ? "Latest Analysis" : "Historical Record",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
-              ),
-            ]),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                // ✅ إصلاح: background مختلف في dark mode
                 color: isDark ? Colors.white12 : Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 _formatTime(report.date),
                 style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.bold,
-                  // ✅ إصلاح: textColor متكيف
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white70 : Colors.grey[800],
                 ),
               ),
@@ -296,15 +326,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMiniStat("TDS",    "${report.tds.toStringAsFixed(0)} PPM", subtitleColor),
-              _buildMiniStat("Purity", "${report.purity.toStringAsFixed(0)}%", subtitleColor),
+              _buildMiniStat(isAgricultural ? "Salinity" : "TDS",    "${report.tds.toStringAsFixed(0)} PPM", subtitleColor),
+              _buildMiniStat(isAgricultural ? "Moisture" : "Purity", "${report.purity.toStringAsFixed(0)}%", subtitleColor),
               _buildMiniStat("Temp",   "${report.temperature.toStringAsFixed(1)}°C", subtitleColor),
             ],
           ),
         ),
 
-        // ✅ بنمرر isDark هنا كمان
-        _buildAgricultureAdvice(report.tds, report.temperature, aiResult.isSafe, isDark),
+        // ✅ Agriculture advice only shown in Agricultural mode
+        if (isAgricultural) ...[
+          _buildAgricultureAdvice(report.tds, report.temperature, aiResult.isSafe, isDark),
+        ],
       ]),
     );
   }
@@ -354,14 +386,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  Widget _buildEmptyState(Color subtitleColor) {
+  Widget _buildEmptyState(Color subtitleColor, String title, String subtitle) {
     return Center(
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.history, size: 60, color: Colors.grey[400]),
+        Icon(Icons.analytics_outlined, size: 60, color: Colors.grey[400]),
         const SizedBox(height: 16),
-        Text("No reports yet", style: TextStyle(fontSize: 16, color: subtitleColor, fontWeight: FontWeight.w600)),
+        Text(title, style: TextStyle(fontSize: 16, color: subtitleColor, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
-        Text("Start a Visual Analysis in the Dashboard.",
+        Text(subtitle,
             textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
       ]),
     );

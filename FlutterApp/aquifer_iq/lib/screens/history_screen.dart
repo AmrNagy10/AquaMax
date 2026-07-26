@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../services/reports_service.dart';
+import '../services/mode_service.dart';
+import '../models/app_mode.dart';
 import '../screens/report_detail_screen.dart';
 import '../screens/compare_reports_screen.dart';
 
@@ -132,7 +134,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       foregroundColor: const Color(0xFF185FA5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text("Crop Type"),
+                    child: Consumer<ModeService>(
+                      builder: (context, modeService, child) => Text(
+                        modeService.currentMode == AppMode.agricultural ? "Crop Type" : "Filter",
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -358,13 +364,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "General Water",
-                      style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 15),
-                    ),
-                    Text(
-                      "Analysis Log",
-                      style: TextStyle(fontSize: 12, color: subtitleColor),
+                    Consumer<ModeService>(
+                      builder: (context, modeService, child) => Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            modeService.currentMode == AppMode.agricultural
+                                ? "Irrigation Data"
+                                : "General Water",
+                            style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 15),
+                          ),
+                          Text(
+                            modeService.currentMode == AppMode.agricultural
+                                ? "Field Log"
+                                : "Analysis Log",
+                            style: TextStyle(fontSize: 12, color: subtitleColor),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

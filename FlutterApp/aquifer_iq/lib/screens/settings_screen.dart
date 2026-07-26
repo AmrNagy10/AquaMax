@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../services/mode_service.dart';
 import '../services/theme_service.dart';
 import '../services/ble_service.dart';
 import '../services/reports_service.dart';
+import '../models/app_mode.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -10,8 +12,10 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeService = context.watch<ThemeService>();
+    final modeService = context.watch<ModeService>();
     final bleService = context.watch<BleService>();
     final isDark = themeService.isDarkMode;
+    final currentMode = modeService.currentMode;
 
     // ألوان متكيفة مع الـ theme
     final bgColor = isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6);
@@ -53,6 +57,21 @@ class SettingsScreen extends StatelessWidget {
               cardColor: cardColor,
               dividerColor: dividerColor,
               children: [
+                _buildThemeModeTile(
+                  context: context,
+                  themeService: themeService,
+                  iconBg: iconBg,
+                  textColor: textColor,
+                  subtitleColor: subtitleColor,
+                ),
+                Divider(height: 1, color: dividerColor),
+                _buildModeSelectorTile(
+                  modeService: modeService,
+                  iconBg: iconBg,
+                  textColor: textColor,
+                  subtitleColor: subtitleColor,
+                ),
+                Divider(height: 1, color: dividerColor),
                 _buildToggleTile(
                   icon: Icons.dark_mode_rounded,
                   iconColor: const Color(0xFF185FA5),
@@ -63,14 +82,6 @@ class SettingsScreen extends StatelessWidget {
                   textColor: textColor,
                   subtitleColor: subtitleColor,
                   onChanged: (val) => themeService.toggleDarkMode(val),
-                ),
-                Divider(height: 1, color: dividerColor),
-                _buildThemeModeTile(
-                  context: context,
-                  themeService: themeService,
-                  iconBg: iconBg,
-                  textColor: textColor,
-                  subtitleColor: subtitleColor,
                 ),
               ],
             ),
@@ -432,6 +443,82 @@ class SettingsScreen extends StatelessWidget {
             ),
             Icon(Icons.chevron_right_rounded, color: subtitleColor, size: 22),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ── Mode Selector Tile ──
+  Widget _buildModeSelectorTile({
+    required ModeService modeService,
+    required Color iconBg,
+    required Color textColor,
+    required Color subtitleColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(10)),
+            child: Icon(
+              modeService.currentMode == AppMode.agricultural
+                  ? Icons.eco_rounded
+                  : Icons.home_rounded,
+              color: modeService.currentMode == AppMode.agricultural
+                  ? const Color(0xFF639922)
+                  : const Color(0xFF185FA5),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("App Mode", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildAppModeChip("Home", AppMode.home, modeService, textColor),
+                    const SizedBox(width: 8),
+                    _buildAppModeChip("Agricultural", AppMode.agricultural, modeService, textColor),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppModeChip(String label, AppMode mode, ModeService service, Color textColor) {
+    final isSelected = service.currentMode == mode;
+    final chipColor = mode == AppMode.agricultural
+        ? const Color(0xFF639922)
+        : const Color(0xFF185FA5);
+    return GestureDetector(
+      onTap: () => service.setMode(mode),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? chipColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? chipColor : Colors.grey.withOpacity(0.4),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : textColor,
+          ),
         ),
       ),
     );

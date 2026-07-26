@@ -8,8 +8,10 @@ import '../screens/reports_screen.dart';
 import '../screens/settings_screen.dart';
 import '../services/ble_service.dart';
 import '../services/ai_service.dart';
+import '../services/mode_service.dart';
 import '../services/reports_service.dart';
 import '../services/Scoring_Engine.dart';
+import '../models/app_mode.dart';
 import '../models/score_result.dart';
 import '../widgets/gauge_widget.dart';
 
@@ -50,6 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         purity: snapshot.purity,
         temperature: snapshot.temperature,
         ph: snapshot.ph,
+        mode: context.read<ModeService>().currentMode,
       );
       if (!mounted) return;
 
@@ -65,7 +68,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         imageFile: File(image.path),
         aiResult: result,
       ));
-      setState(() => _currentIndex = 1);
+      setState(() => _currentIndex = 2);
     } catch (e) {
       // حتى في حالة الخطأ نرجع تحديث القراءات
       ble.endCapture();
@@ -84,6 +87,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final ble  = context.watch<BleService>();
     final data = ble.sensorData;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final modeService = context.watch<ModeService>();
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6),
@@ -120,11 +125,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildDashboardBody(SensorData data, BleService ble, bool isDark) {
+    final modeService = context.watch<ModeService>();
+    final currentMode = modeService.currentMode;
+    final labels = ScoringEngine.getLabels(currentMode);
+    final bool connected = ble.isConnected;
+
     final cardColor     = isDark ? const Color(0xFF161B22) : Colors.white;
     final textColor     = isDark ? Colors.white : Colors.black87;
     final subtitleColor = isDark ? Colors.white54 : Colors.grey[600]!;
 
-    final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data);
+    final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data, mode: currentMode);
     final Color gaugeBg = isDark ? const Color(0xFF161B22) : Colors.white;
 
     return SafeArea(
@@ -135,8 +145,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                runSpacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Row(children: [
                     Container(
@@ -148,15 +160,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text("AquaMax", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: textColor)),
                   ]),
                   Row(children: [
+                    // Mode toggle button
+                    GestureDetector(
+                      onTap: modeService.toggleMode,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: currentMode == AppMode.agricultural
+                              ? const Color(0xFF639922)
+                              : const Color(0xFF185FA5),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              currentMode == AppMode.agricultural
+                                  ? Icons.eco_rounded
+                                  : Icons.home_rounded,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              currentMode.label,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
                     IconButton(
                       icon: Icon(ble.isSimulationMode ? Icons.bug_report : Icons.bug_report_outlined, color: ble.isSimulationMode ? Colors.orange : subtitleColor),
                       onPressed: ble.toggleSimulationMode,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      padding: EdgeInsets.zero,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     GestureDetector(
                       onTap: ble.isConnected ? ble.disconnect : ble.startScan,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: cardColor,
                           borderRadius: BorderRadius.circular(20),
@@ -164,16 +213,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         child: Row(children: [
                           Container(
-                            width: 8, height: 8,
+                            width: 7, height: 7,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: ble.isConnected ? const Color(0xFF639922) : Colors.grey[600],
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 5),
                           Text(
-                            ble.isConnected ? (ble.isSimulationMode ? "Simulating" : "Connected") : "Connect",
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: ble.isConnected ? const Color(0xFF3B6D11) : subtitleColor),
+                            ble.isConnected ? (ble.isSimulationMode ? "Sim" : "Connected") : "Connect",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ble.isConnected ? const Color(0xFF3B6D11) : subtitleColor),
                           ),
                         ]),
                       ),
@@ -183,9 +232,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            Text("REAL-TIME ANALYSIS", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.w600)),
+            Row(
+              children: [
+                Text(currentMode == AppMode.agricultural ? "FIELD MONITORING" : "REAL-TIME ANALYSIS", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: currentMode == AppMode.agricultural
+                        ? const Color(0xFF639922).withOpacity(0.15)
+                        : const Color(0xFF185FA5).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: currentMode == AppMode.agricultural
+                          ? const Color(0xFF639922)
+                          : const Color(0xFF185FA5),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        currentMode == AppMode.agricultural
+                            ? Icons.eco_rounded
+                            : Icons.home_rounded,
+                        size: 14,
+                        color: currentMode == AppMode.agricultural
+                            ? const Color(0xFF639922)
+                            : const Color(0xFF185FA5),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        currentMode.label,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: currentMode == AppMode.agricultural
+                              ? const Color(0xFF639922)
+                              : const Color(0xFF185FA5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 6),
-            Text("System Health", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: textColor)),
+            Text(labels['dashboardTitle']!, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: textColor)),
             const SizedBox(height: 20),
 
             Container(
@@ -204,7 +298,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Water Quality Score", style: TextStyle(color: subtitleColor, fontSize: 14)),
+                          Text(labels['scoreLabel']! + " Score", style: TextStyle(color: subtitleColor, fontSize: 14)),
                           const SizedBox(height: 4),
                           Text(scoreResult.message, style: TextStyle(color: scoreResult.statusColor, fontSize: 20, fontWeight: FontWeight.bold)),
                         ],
@@ -264,38 +358,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
               childAspectRatio: 1.0,
               children: [
                 GaugeWidget(
-                  title: "TDS Level",
+                  title: currentMode == AppMode.agricultural ? "Salinity (TDS)" : "TDS Level",
+                  subtitle: !connected
+                      ? "--" : currentMode == AppMode.agricultural
+                      ? (data.tds <= 300 ? "Excellent" : data.tds <= 600 ? "Good" : data.tds <= 900 ? "Caution" : "Critical")
+                      : (data.tds <= 300 ? "Ideal" : data.tds <= 600 ? "Acceptable" : data.tds <= 900 ? "High" : "Unsafe"),
                   value: data.tds,
                   maxValue: 1200,
                   displayText: data.tds.toStringAsFixed(0),
-                  unit: "PPM",
+                  unit: labels['tdsUnit']!,
                   activeColor: ScoringEngine.getTdsColor(data.tds),
                   bgColor: gaugeBg,
                 ),
                 GaugeWidget(
-                  title: "Water Purity",
+                  title: currentMode == AppMode.agricultural ? "Soil Moisture" : "Water Purity",
+                  subtitle: !connected
+                      ? "--": currentMode == AppMode.agricultural
+                      ? (data.purity >= 90 ? "Optimal" : data.purity >= 70 ? "Adequate" : "Low")
+                      : (data.purity >= 90 ? "Crystal Clear" : data.purity >= 70 ? "Acceptable" : "Needs Filter"),
                   value: data.purity,
                   maxValue: 100,
                   displayText: data.purity.toStringAsFixed(0),
-                  unit: "%",
+                  unit: labels['purityUnit']!,
                   activeColor: ScoringEngine.getPurityColor(data.purity),
                   bgColor: gaugeBg,
                 ),
                 GaugeWidget(
                   title: "pH Level",
+                  subtitle: !connected
+                      ? "--": currentMode == AppMode.agricultural
+                      ? (data.ph >= 6.0 && data.ph <= 8.5 ? "Ideal for Crops" : "Check Soil Impact")
+                      : (data.ph >= 6.5 && data.ph <= 8.5 ? "Safe for Drinking" : "Outside WHO Range"),
                   value: data.ph,
                   maxValue: 14,
                   displayText: data.ph.toStringAsFixed(1),
-                  unit: "pH",
+                  unit: labels['phUnit']!,
                   activeColor: ScoringEngine.getPhColor(data.ph),
                   bgColor: gaugeBg,
                 ),
                 GaugeWidget(
                   title: "Temperature",
+
+                  subtitle: !connected
+                      ? "--": currentMode == AppMode.agricultural
+                      ? (data.temperature >= 10 && data.temperature <= 30 ? "Safe for Irrigation" : "Extreme for Crops")
+                      : (data.temperature >= 15 && data.temperature <= 25 ? "Ideal Range" : "Check Quality"),
                   value: data.temperature,
                   maxValue: 50,
                   displayText: data.temperature.toStringAsFixed(1),
-                  unit: "°C",
+                  unit: labels['tempUnit']!,
                   activeColor: ScoringEngine.getTemperatureColor(data.temperature),
                   bgColor: gaugeBg,
                 ),
@@ -317,7 +428,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: _isAnalyzing
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.auto_awesome),
-                label: Text(_isAnalyzing ? "Analyzing..." : "Run AI Visual Scan", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                label: Text(
+                  _isAnalyzing ? "Analyzing..." : "Run AI ${currentMode == AppMode.agricultural ? 'Irrigation' : 'Visual'} Scan",
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
             const SizedBox(height: 40),
