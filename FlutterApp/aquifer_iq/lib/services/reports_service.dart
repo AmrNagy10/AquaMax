@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/app_mode.dart';
 import '../services/ai_service.dart';
 import '../services/Scoring_Engine.dart';
 import '../services/ble_service.dart';
