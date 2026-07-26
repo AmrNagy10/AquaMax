@@ -101,7 +101,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // ملحوظة: النسخة الأصلية كانت بتنادي calculateScore من غير mode،
       // يعني كانت بتحسب score التقرير المحفوظ بأوزان Home دايمًا حتى لو
       // المستخدم في Agricultural. صلحتها هنا عشان تطابق الـ mode الفعلي.
-      final scoreRes = ScoringEngine.calculateScore(snapshot, mode: mode);
+      final farmProfile = context.read<FarmProfileService>().profileOrDefault;
+      final scoreRes = ScoringEngine.calculateScore(snapshot, mode: mode, farmProfile: farmProfile);
 
       context.read<ReportsService>().addReport(WaterAnalysisReport(
         date: DateTime.now(),
@@ -252,7 +253,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final textColor     = isDark ? Colors.white : Colors.black87;
     final subtitleColor = isDark ? Colors.white54 : Colors.grey[600]!;
 
-    final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data, mode: currentMode);
+    final farmProfile = context.watch<FarmProfileService>().profileOrDefault;
+    final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data, mode: currentMode, farmProfile: farmProfile);
     final Color gaugeBg = isDark ? const Color(0xFF161B22) : Colors.white;
 
     return SafeArea(
@@ -501,6 +503,65 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   activeColor: ScoringEngine.getPurityColor(data.purity),
                   bgColor: gaugeBg,
                 ),
+                if (currentMode == AppMode.agricultural && connected)
+                  Builder(
+                      builder: (context) {
+                        final risk = farmProfile.soilRiskFor(data.tds);
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            color: risk.color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: risk.color.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: risk.color,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      "Soil Health Impact",
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: risk.color,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                risk.label,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: textColor.withOpacity(0.8),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Current Profile: ${farmProfile.cropType.label} in ${farmProfile.soilType.label} soil",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: subtitleColor,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                  ),
                 GaugeWidget(
                   title: "pH Level",
                   subtitle: !connected

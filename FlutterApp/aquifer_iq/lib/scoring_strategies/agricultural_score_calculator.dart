@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/score_result.dart';
 import '../services/ble_service.dart';
 import 'score_calculator.dart';
+import '../../models/farm_profile.dart';
 
 /// Agricultural mode scoring strategy.
 ///
@@ -22,15 +23,25 @@ class AgriculturalScoreCalculator implements ScoreCalculator {
   };
 
   @override
-  Map<String, double> calculateSubScores(SensorData data) {
-    // TDS Score (Ideal < 300 for irrigation, 300-600 acceptable)
-    double tdsScore = (data.tds <= 300)
-        ? 100
-        : (data.tds <= 600)
-        ? 100 - ((data.tds - 300) / (600 - 300) * 30) // 100 -> 70
-        : (data.tds <= 1200)
-        ? 70 - ((data.tds - 600) / (1200 - 600) * 70) // 70 -> 0
-        : 0;
+  Map<String, double> calculateSubScores(SensorData data, {FarmProfile? farmProfile}) {
+    // Get thresholds based on crop salinity tolerance
+    final profile = farmProfile ?? FarmProfile.fallbackDefault;
+    final tolerance = profile.cropType.tolerance;
+    final threshold = CropSalinityData.thresholds[tolerance]!;
+
+    // TDS Score based on crop-specific thresholds
+    double tdsScore = 0;
+    if (data.tds <= threshold.excellent) {
+      tdsScore = 100;
+    } else if (data.tds <= threshold.acceptable) {
+      // Scale from 100 to 70
+      tdsScore = 100 - ((data.tds - threshold.excellent) / (threshold.acceptable - threshold.excellent) * 30);
+    } else if (data.tds <= threshold.max) {
+      // Scale from 70 to 0
+      tdsScore = 70 - ((data.tds - threshold.acceptable) / (threshold.max - threshold.acceptable) * 70);
+    } else {
+      tdsScore = 0;
+    }
     tdsScore = tdsScore.clamp(0.0, 100.0);
 
     // Purity Score (0-100) — sediment affects irrigation systems
@@ -108,8 +119,8 @@ class AgriculturalScoreCalculator implements ScoreCalculator {
   }
 
   @override
-  WaterScoreResult calculate(SensorData data, double aiMultiplier) {
-    final subScores = calculateSubScores(data);
+  WaterScoreResult calculate(SensorData data, double aiMultiplier, {FarmProfile? farmProfile}) {
+    final subScores = calculateSubScores(data, farmProfile: farmProfile);
     final w = weights;
 
     double finalScore = (subScores['tds']! * w['tds']!) +

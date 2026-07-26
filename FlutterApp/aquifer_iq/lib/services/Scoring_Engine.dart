@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/score_result.dart';
 import '../models/app_mode.dart';
+import '../models/farm_profile.dart';
 import 'ble_service.dart';
 import '/scoring_strategies/home_score_calculator.dart';
 import '/scoring_strategies/agricultural_score_calculator.dart';
@@ -39,7 +40,7 @@ class ScoringEngine {
   }
 
   /// Main entry point — delegates to the appropriate strategy
-  static WaterScoreResult calculateScore(SensorData data, {AppMode mode = AppMode.home, double aiMultiplier = 1.0}) {
+  static WaterScoreResult calculateScore(SensorData data, {AppMode mode = AppMode.home, double aiMultiplier = 1.0, FarmProfile? farmProfile}) {
     if (data.tds == 0 && data.purity == 0 && data.temperature == 0 && data.ph == 0) {
       return WaterScoreResult(
         numericScore: 0,
@@ -51,7 +52,7 @@ class ScoringEngine {
     }
 
     final strategy = _strategies[mode] ?? _strategies[AppMode.home]!;
-    return strategy.calculate(data, aiMultiplier);
+    return strategy.calculate(data, aiMultiplier, farmProfile: farmProfile);
   }
 
   // pH Color Helper

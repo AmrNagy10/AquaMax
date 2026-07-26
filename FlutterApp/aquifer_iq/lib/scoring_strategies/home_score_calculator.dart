@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/score_result.dart';
 import '../services/ble_service.dart';
 import 'score_calculator.dart';
+import '../../models/farm_profile.dart';
 
 /// Home mode scoring strategy.
 ///
@@ -22,7 +23,7 @@ class HomeScoreCalculator implements ScoreCalculator {
   };
 
   @override
-  Map<String, double> calculateSubScores(SensorData data) {
+  Map<String, double> calculateSubScores(SensorData data, {FarmProfile? farmProfile}) {
     // TDS Score (Ideal < 150 PPM for drinking water)
     double tdsScore = (data.tds <= 150)
         ? 100
@@ -103,8 +104,8 @@ class HomeScoreCalculator implements ScoreCalculator {
   }
 
   @override
-  WaterScoreResult calculate(SensorData data, double aiMultiplier) {
-    final subScores = calculateSubScores(data);
+  WaterScoreResult calculate(SensorData data, double aiMultiplier, {FarmProfile? farmProfile}) {
+    final subScores = calculateSubScores(data, farmProfile: farmProfile);
     final w = weights;
 
     double finalScore = (subScores['tds']! * w['tds']!) +

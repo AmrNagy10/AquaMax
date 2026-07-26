@@ -4,6 +4,8 @@ import '../services/mode_service.dart';
 import '../services/theme_service.dart';
 import '../services/ble_service.dart';
 import '../services/reports_service.dart';
+import '../services/farm_profile_service.dart';
+import '../widgets/farm_profile_setup_sheet.dart';
 import '../models/app_mode.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -15,7 +17,6 @@ class SettingsScreen extends StatelessWidget {
     final modeService = context.watch<ModeService>();
     final bleService = context.watch<BleService>();
     final isDark = themeService.isDarkMode;
-    final currentMode = modeService.currentMode;
 
     // ألوان متكيفة مع الـ theme
     final bgColor = isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6);
@@ -66,6 +67,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 Divider(height: 1, color: dividerColor),
                 _buildModeSelectorTile(
+                  context: context, // ✅ Added context parameter
                   modeService: modeService,
                   iconBg: iconBg,
                   textColor: textColor,
@@ -100,7 +102,11 @@ class SettingsScreen extends StatelessWidget {
                   iconColor: bleService.isConnected ? const Color(0xFF639922) : Colors.grey,
                   iconBg: iconBg,
                   title: "Sensor Status",
-                  value: bleService.isConnected ? "Connected ✓" : bleService.isScanning ? "Scanning..." : "Disconnected",
+                  value: bleService.isConnected
+                      ? "Connected ✓"
+                      : bleService.isScanning
+                      ? "Scanning..."
+                      : "Disconnected",
                   valueColor: bleService.isConnected ? const Color(0xFF639922) : Colors.grey,
                   textColor: textColor,
                   subtitleColor: subtitleColor,
@@ -334,7 +340,6 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Text("Theme Mode", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
                 const SizedBox(height: 8),
-                // أزرار الاختيار الثلاثة
                 Row(
                   children: [
                     _buildModeChip("System", ThemeMode.system, themeService, textColor),
@@ -450,6 +455,7 @@ class SettingsScreen extends StatelessWidget {
 
   // ── Mode Selector Tile ──
   Widget _buildModeSelectorTile({
+    required BuildContext context, // ✅ Added context parameter
     required ModeService modeService,
     required Color iconBg,
     required Color textColor,
@@ -482,9 +488,9 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildAppModeChip("Home", AppMode.home, modeService, textColor),
+                    _buildAppModeChip(context, "Home", AppMode.home, modeService, textColor),
                     const SizedBox(width: 8),
-                    _buildAppModeChip("Agricultural", AppMode.agricultural, modeService, textColor),
+                    _buildAppModeChip(context, "Agricultural", AppMode.agricultural, modeService, textColor),
                   ],
                 ),
               ],
@@ -495,13 +501,25 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppModeChip(String label, AppMode mode, ModeService service, Color textColor) {
+  Widget _buildAppModeChip(BuildContext context, String label, AppMode mode, ModeService service, Color textColor) {
     final isSelected = service.currentMode == mode;
     final chipColor = mode == AppMode.agricultural
         ? const Color(0xFF639922)
         : const Color(0xFF185FA5);
     return GestureDetector(
-      onTap: () => service.setMode(mode),
+      onTap: () async {
+        if (mode == AppMode.agricultural && service.currentMode == AppMode.home) {
+          await service.setMode(AppMode.agricultural);
+          if (context.mounted) {
+            final farmProfile = context.read<FarmProfileService>();
+            if (!farmProfile.hasProfile) {
+              await showFarmProfileSetupSheet(context);
+            }
+          }
+        } else {
+          service.setMode(mode);
+        }
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -537,12 +555,18 @@ class SettingsScreen extends StatelessWidget {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
-              context.read<ReportsService>().clearAll(); // ✅ دالة بنضيفها في ReportsService
+              context.read<ReportsService>().clearAll();
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("All reports cleared."), backgroundColor: Colors.redAccent),
+                const SnackBar(
+                  content: Text("All reports cleared."),
+                  backgroundColor: Colors.redAccent,
+                ),
               );
             },
             child: const Text("Clear All"),
