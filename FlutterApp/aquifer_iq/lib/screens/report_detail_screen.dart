@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+<<<<<<< HEAD
+<<<<<<< HEAD
 import 'package:provider/provider.dart';
 import '../services/reports_service.dart';
 import '../services/mode_service.dart';
 import '../services/Scoring_Engine.dart';
 import '../models/app_mode.dart';
+=======
+=======
+import 'package:provider/provider.dart';
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
+import '../services/reports_service.dart';
+import '../services/mode_service.dart';
+import '../services/Scoring_Engine.dart';
+<<<<<<< HEAD
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+import '../models/app_mode.dart';
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
 
 class ReportDetailScreen extends StatelessWidget {
   final WaterAnalysisReport report;
@@ -21,11 +35,21 @@ class ReportDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6),
       appBar: AppBar(
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
         title: Consumer<ModeService>(
           builder: (context, modeService, child) => Text(
             modeService.currentMode == AppMode.agricultural ? "Irrigation Report" : "Analysis Details",
           ),
         ),
+<<<<<<< HEAD
+=======
+        title: const Text("Analysis Details"),
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: textColor,
@@ -83,6 +107,10 @@ class ReportDetailScreen extends StatelessWidget {
             const SizedBox(height: 25),
 
             // Sensors Data Card
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
             Consumer<ModeService>(
               builder: (context, modeService, child) {
                 final isAg = modeService.currentMode == AppMode.agricultural;
@@ -110,6 +138,7 @@ class ReportDetailScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 25),
+<<<<<<< HEAD
 
                     // AI Analysis
                     Text(isAg ? "AI IRRIGATION ANALYSIS" : "AI ANALYSIS & RECOMMENDATION", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
@@ -156,6 +185,80 @@ class ReportDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
+=======
+            Text("SENSOR READINGS", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  _buildDataRow("TDS Level", "${report.tds.toStringAsFixed(0)} PPM", Icons.opacity, Colors.cyan),
+                  const Divider(),
+                  _buildDataRow("pH Level", report.ph.toStringAsFixed(1), Icons.science, ScoringEngine.getPhColor(report.ph)),
+                  const Divider(),
+                  _buildDataRow("Purity", "${report.purity.toStringAsFixed(0)}%", Icons.clean_hands, Colors.green),
+                  const Divider(),
+                  _buildDataRow("Temperature", "${report.temperature.toStringAsFixed(1)}°C", Icons.thermostat, Colors.blue),
+                ],
+              ),
+            ),
+            const SizedBox(height: 25),
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
+
+                    // AI Analysis
+                    Text(isAg ? "AI IRRIGATION ANALYSIS" : "AI ANALYSIS & RECOMMENDATION", style: TextStyle(fontSize: 12, color: subtitleColor, letterSpacing: 1.2, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: isAg ? const Color(0xFF639922).withOpacity(0.1) : const Color(0xFF185FA5).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: isAg ? const Color(0xFF639922).withOpacity(0.3) : const Color(0xFF185FA5).withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(isAg ? Icons.eco_rounded : Icons.auto_awesome, color: isAg ? const Color(0xFF639922) : const Color(0xFF185FA5), size: 20),
+                              const SizedBox(width: 10),
+                              Text(isAg ? "Field Insights" : "Expert Insights", style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                report.aiResult.summary,
+                                style: TextStyle(color: textColor, height: 1.6),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                report.aiResult.recommendation,
+                                style: TextStyle(color: textColor, height: 1.6),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 40),
+<<<<<<< HEAD
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
           ],
         ),
       ),

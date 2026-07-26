@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/ble_service.dart';
 import 'screens/dashboard_screen.dart';
+import 'services/mode_service.dart';
 import 'services/reports_service.dart';
 import 'services/theme_service.dart';
 
@@ -14,6 +15,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => BleService()),
         ChangeNotifierProvider(create: (_) => ReportsService()),
         ChangeNotifierProvider(create: (_) => ThemeService()),
+        ChangeNotifierProvider(create: (_) => ModeService()),
       ],
       child: const AquaMaxApp(), // ✅ تم التعديل
     ),

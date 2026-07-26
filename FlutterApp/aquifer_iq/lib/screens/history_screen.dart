@@ -3,8 +3,16 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../services/reports_service.dart';
+<<<<<<< HEAD
+<<<<<<< HEAD
 import '../services/mode_service.dart';
 import '../models/app_mode.dart';
+=======
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+import '../services/mode_service.dart';
+import '../models/app_mode.dart';
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
 import '../screens/report_detail_screen.dart';
 import '../screens/compare_reports_screen.dart';
 
@@ -134,11 +142,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       foregroundColor: const Color(0xFF185FA5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                     child: Consumer<ModeService>(
                       builder: (context, modeService, child) => Text(
                         modeService.currentMode == AppMode.agricultural ? "Crop Type" : "Filter",
                       ),
                     ),
+<<<<<<< HEAD
+=======
+                    child: const Text("Crop Type"),
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   ),
                 ),
               ],
@@ -364,6 +382,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                     Consumer<ModeService>(
                       builder: (context, modeService, child) => Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -383,6 +405,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         ],
                       ),
+<<<<<<< HEAD
+=======
+                    Text(
+                      "General Water",
+                      style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 15),
+                    ),
+                    Text(
+                      "Analysis Log",
+                      style: TextStyle(fontSize: 12, color: subtitleColor),
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                     ),
                   ],
                 ),

@@ -20,6 +20,9 @@ class GaugeWidget extends StatefulWidget {
   final Color activeColor;
   final Color bgColor;
 
+  // نص وصفي تحت العنوان (مثل "Ideal", "Caution", "Unsafe") — Optional
+  final String? subtitle;
+
   // مدة الـ animation — قابلة للتخصيص من الخارج لو احتجنا
   final Duration animationDuration;
 
@@ -32,6 +35,7 @@ class GaugeWidget extends StatefulWidget {
     required this.unit,
     required this.activeColor,
     this.bgColor = Colors.white,
+    this.subtitle,
     this.animationDuration = const Duration(milliseconds: 900),
   });
 
@@ -185,6 +189,24 @@ class _GaugeWidgetState extends State<GaugeWidget>
               letterSpacing: 0.5,
             ),
           ),
+          if (widget.subtitle != null) ...[
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: widget.activeColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                widget.subtitle!,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: widget.activeColor,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
 
           // ── الدايرة + النص الداخلي ─────────────────────────────────────

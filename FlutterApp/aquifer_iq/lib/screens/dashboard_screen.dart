@@ -11,7 +11,14 @@ import '../services/ai_service.dart';
 import '../services/mode_service.dart';
 import '../services/reports_service.dart';
 import '../services/Scoring_Engine.dart';
+<<<<<<< HEAD
+<<<<<<< HEAD
 import '../models/app_mode.dart';
+=======
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+import '../models/app_mode.dart';
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
 import '../models/score_result.dart';
 import '../widgets/gauge_widget.dart';
 
@@ -52,7 +59,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         purity: snapshot.purity,
         temperature: snapshot.temperature,
         ph: snapshot.ph,
+<<<<<<< HEAD
+<<<<<<< HEAD
         mode: context.read<ModeService>().currentMode,
+=======
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+        mode: context.read<ModeService>().currentMode,
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
       );
       if (!mounted) return;
 
@@ -68,7 +82,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         imageFile: File(image.path),
         aiResult: result,
       ));
+<<<<<<< HEAD
+<<<<<<< HEAD
       setState(() => _currentIndex = 2);
+=======
+      setState(() => _currentIndex = 1);
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+      setState(() => _currentIndex = 2);
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
     } catch (e) {
       // حتى في حالة الخطأ نرجع تحديث القراءات
       ble.endCapture();
@@ -134,7 +156,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final textColor     = isDark ? Colors.white : Colors.black87;
     final subtitleColor = isDark ? Colors.white54 : Colors.grey[600]!;
 
+<<<<<<< HEAD
+<<<<<<< HEAD
     final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data, mode: currentMode);
+=======
+    final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data);
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+    final WaterScoreResult scoreResult = ScoringEngine.calculateScore(data, mode: currentMode);
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
     final Color gaugeBg = isDark ? const Color(0xFF161B22) : Colors.white;
 
     return SafeArea(
@@ -160,6 +190,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text("AquaMax", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700, color: textColor)),
                   ]),
                   Row(children: [
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                     // Mode toggle button
                     GestureDetector(
                       onTap: modeService.toggleMode,
@@ -195,6 +229,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     const SizedBox(width: 4),
+<<<<<<< HEAD
                     IconButton(
                       icon: Icon(ble.isSimulationMode ? Icons.bug_report : Icons.bug_report_outlined, color: ble.isSimulationMode ? Colors.orange : subtitleColor),
                       onPressed: ble.toggleSimulationMode,
@@ -206,6 +241,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onTap: ble.isConnected ? ble.disconnect : ble.startScan,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+=======
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
+                    IconButton(
+                      icon: Icon(ble.isSimulationMode ? Icons.bug_report : Icons.bug_report_outlined, color: ble.isSimulationMode ? Colors.orange : subtitleColor),
+                      onPressed: ble.toggleSimulationMode,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      padding: EdgeInsets.zero,
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: ble.isConnected ? ble.disconnect : ble.startScan,
+                      child: Container(
+<<<<<<< HEAD
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                         decoration: BoxDecoration(
                           color: cardColor,
                           borderRadius: BorderRadius.circular(20),
@@ -213,16 +267,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         child: Row(children: [
                           Container(
+<<<<<<< HEAD
+<<<<<<< HEAD
                             width: 7, height: 7,
+=======
+                            width: 8, height: 8,
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                            width: 7, height: 7,
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: ble.isConnected ? const Color(0xFF639922) : Colors.grey[600],
                             ),
                           ),
+<<<<<<< HEAD
+<<<<<<< HEAD
                           const SizedBox(width: 5),
                           Text(
                             ble.isConnected ? (ble.isSimulationMode ? "Sim" : "Connected") : "Connect",
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ble.isConnected ? const Color(0xFF3B6D11) : subtitleColor),
+=======
+                          const SizedBox(width: 6),
+                          Text(
+                            ble.isConnected ? (ble.isSimulationMode ? "Simulating" : "Connected") : "Connect",
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: ble.isConnected ? const Color(0xFF3B6D11) : subtitleColor),
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                          const SizedBox(width: 5),
+                          Text(
+                            ble.isConnected ? (ble.isSimulationMode ? "Sim" : "Connected") : "Connect",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: ble.isConnected ? const Color(0xFF3B6D11) : subtitleColor),
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                           ),
                         ]),
                       ),
@@ -299,6 +375,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(labels['scoreLabel']! + " Score", style: TextStyle(color: subtitleColor, fontSize: 14)),
+<<<<<<< HEAD
                           const SizedBox(height: 4),
                           Text(scoreResult.message, style: TextStyle(color: scoreResult.statusColor, fontSize: 20, fontWeight: FontWeight.bold)),
                         ],
@@ -349,6 +426,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 20),
 
+<<<<<<< HEAD
+=======
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: scoreResult.statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: scoreResult.statusColor.withOpacity(0.3)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Water Quality Score", style: TextStyle(color: subtitleColor, fontSize: 14)),
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
+                          const SizedBox(height: 4),
+                          Text(scoreResult.message, style: TextStyle(color: scoreResult.statusColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: scoreResult.statusColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          scoreResult.grade,
+                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 1500),
+                    curve: Curves.easeOutCubic,
+                    tween: Tween<double>(begin: 0, end: scoreResult.numericScore / 100),
+                    builder: (context, value, child) {
+                      return Column(
+                        children: [
+                          LinearProgressIndicator(
+                            value: value,
+                            backgroundColor: scoreResult.statusColor.withOpacity(0.2),
+                            color: scoreResult.statusColor,
+                            minHeight: 12,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("0", style: TextStyle(color: subtitleColor)),
+                              Text("${(value * 100).toStringAsFixed(1)}%", style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                              Text("100", style: TextStyle(color: subtitleColor)),
+                            ],
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
@@ -366,7 +515,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   value: data.tds,
                   maxValue: 1200,
                   displayText: data.tds.toStringAsFixed(0),
+<<<<<<< HEAD
+<<<<<<< HEAD
                   unit: labels['tdsUnit']!,
+=======
+                  unit: "PPM",
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                  unit: labels['tdsUnit']!,
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   activeColor: ScoringEngine.getTdsColor(data.tds),
                   bgColor: gaugeBg,
                 ),
@@ -379,20 +536,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   value: data.purity,
                   maxValue: 100,
                   displayText: data.purity.toStringAsFixed(0),
+<<<<<<< HEAD
+<<<<<<< HEAD
                   unit: labels['purityUnit']!,
+=======
+                  unit: "%",
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                  unit: labels['purityUnit']!,
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   activeColor: ScoringEngine.getPurityColor(data.purity),
                   bgColor: gaugeBg,
                 ),
                 GaugeWidget(
                   title: "pH Level",
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   subtitle: !connected
                       ? "--": currentMode == AppMode.agricultural
                       ? (data.ph >= 6.0 && data.ph <= 8.5 ? "Ideal for Crops" : "Check Soil Impact")
                       : (data.ph >= 6.5 && data.ph <= 8.5 ? "Safe for Drinking" : "Outside WHO Range"),
+<<<<<<< HEAD
                   value: data.ph,
                   maxValue: 14,
                   displayText: data.ph.toStringAsFixed(1),
                   unit: labels['phUnit']!,
+=======
+                  value: data.ph,
+                  maxValue: 14,
+                  displayText: data.ph.toStringAsFixed(1),
+                  unit: "pH",
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                  value: data.ph,
+                  maxValue: 14,
+                  displayText: data.ph.toStringAsFixed(1),
+                  unit: labels['phUnit']!,
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   activeColor: ScoringEngine.getPhColor(data.ph),
                   bgColor: gaugeBg,
                 ),
@@ -406,7 +588,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   value: data.temperature,
                   maxValue: 50,
                   displayText: data.temperature.toStringAsFixed(1),
+<<<<<<< HEAD
+<<<<<<< HEAD
                   unit: labels['tempUnit']!,
+=======
+                  unit: "°C",
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+                  unit: labels['tempUnit']!,
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                   activeColor: ScoringEngine.getTemperatureColor(data.temperature),
                   bgColor: gaugeBg,
                 ),
@@ -428,10 +618,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: _isAnalyzing
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.auto_awesome),
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
                 label: Text(
                   _isAnalyzing ? "Analyzing..." : "Run AI ${currentMode == AppMode.agricultural ? 'Irrigation' : 'Visual'} Scan",
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
+<<<<<<< HEAD
+=======
+                label: Text(_isAnalyzing ? "Analyzing..." : "Run AI Visual Scan", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+>>>>>>> 5df08f9 (Redesigning and add new Featrues for SensorX)
+=======
+>>>>>>> cabb3a2 (Add Hame&agricultural modes with some changes at ui)
               ),
             ),
             const SizedBox(height: 40),
