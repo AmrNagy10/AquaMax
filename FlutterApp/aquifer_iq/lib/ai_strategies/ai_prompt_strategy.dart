@@ -1,4 +1,3 @@
-import '../services//ble_service.dart';
 
 /// Abstract interface for AI prompt generation strategies.
 /// Each mode (Home, Agricultural, Industrial, ...) implements this interface
@@ -15,12 +14,21 @@ abstract class AiPromptStrategy {
   /// and output rules — all tailored to the specific mode.
   /// [hasImage] بتحدد هل فيه صورة اتصورت وهتتبعت مع الـ request فعليًا،
   /// عشان الـ prompt يعدّل صياغته (يسأل عن تفاصيل بصرية أو يتجاهلها).
+  /// الـ parameters من [saltTrendLabel] لحد آخر السطر اختيارية ومخصوصة
+  /// لوضع Agricultural — بتوصل من [FarmProfile.calculateSaltTrend] و
+  /// [FarmProfile.getLeachingRecommendation] قبل ما الـ AI request يتبعت.
+  /// الـ strategies اللي مش محتاجاها (زي Home) بتتجاهلها بأمان لأنها nullable.
   String buildPrompt({
     required double tds,
     required double purity,
     required double temperature,
     required double? ph,
     required bool hasImage,
+    String? saltTrendLabel,
+    double? avgTds7Days,
+    bool? needsLeaching,
+    String? leachingMessage,
+    String? leachingAdvice,
   });
 
   /// Build the system message that sets the AI's role.

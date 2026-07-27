@@ -6,11 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="a75dc62a-cba0-4d16-a825-718753796cfe" name="Changes" comment="Add Hame&amp;agricultural modes with some changes at ui">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/models/farm_profile.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/models/farm_profile.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/devtools_options.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/devtools_options.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/ai_strategies/agricultural_prompt_strategy.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/ai_strategies/agricultural_prompt_strategy.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/ai_strategies/ai_prompt_strategy.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/ai_strategies/ai_prompt_strategy.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/ai_strategies/home_prompt_strategy.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/ai_strategies/home_prompt_strategy.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/dashboard_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/reports_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/reports_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/settings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/screens/settings_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/farm_profile_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/farm_profile_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/ai_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/ai_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/reports_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/FlutterApp/aquifer_iq/lib/services/reports_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +23,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="DartProblemsView" group-by-severity="false" />
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>

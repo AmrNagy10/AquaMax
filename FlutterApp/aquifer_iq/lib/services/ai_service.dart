@@ -57,6 +57,16 @@ class AiService {
     required double temperature,
     double? ph,
     AppMode mode = AppMode.home,
+    // ─── Historical trend + Leaching context (Agricultural mode فقط) ───
+    // بتوصل جاهزة من الشاشة اللي بتنادي الـ service (محسوبة أصلاً من
+    // FarmProfile.calculateSaltTrend / getLeachingRecommendation)، عشان
+    // الـ AiService يفضل مسؤول بس عن التواصل مع الـ API، مش عن حسابات
+    // الزراعة. لو null (زي Home mode)، الـ strategy بتتجاهلها بأمان.
+    String? saltTrendLabel,
+    double? avgTds7Days,
+    bool? needsLeaching,
+    String? leachingMessage,
+    String? leachingAdvice,
   }) async {
     try {
       // Get the appropriate strategy for this mode
@@ -69,6 +79,11 @@ class AiService {
         temperature: temperature,
         ph: ph,
         hasImage: hasImage,
+        saltTrendLabel: saltTrendLabel,
+        avgTds7Days: avgTds7Days,
+        needsLeaching: needsLeaching,
+        leachingMessage: leachingMessage,
+        leachingAdvice: leachingAdvice,
       );
 
       // نبني محتوى الرسالة ديناميكيًا: النص دايمًا موجود، وصورة الـ base64

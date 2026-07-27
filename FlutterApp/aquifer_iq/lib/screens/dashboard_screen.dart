@@ -17,7 +17,6 @@ import '../models/farm_profile.dart';
 import '../services/farm_profile_service.dart';
 import '../widgets/gauge_widget.dart';
 import '../widgets/farm_profile_setup_sheet.dart';
-import '../services/reports_service.dart';
 
 /// نتيجة اختيار المستخدم في وضع Agricultural: يصور ورقة، أو يكمل بالحساسات بس.
 /// null (لو الـ sheet اتقفلت من غير اختيار) = إلغاء العملية بالكامل.
@@ -89,6 +88,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final snapshot = ble.sensorData;
       setState(() => _isAnalyzing = true);
 
+      // ─── Historical trend + Leaching context لوضع Agricultural فقط ───
+      // بنحسبهم هنا (مش جوا الـ AiService) عشان الـ farm domain logic تفضل
+      // في مكان واحد (FarmProfile) والـ AiService يفضل بس مسؤول عن التواصل
+      // مع الـ API. ملحوظة: الـ report الحالي لسه ماتضافش لـ ReportsService
+      // في اللحظة دي (بيتضاف بعد الـ AI call تحت)، فمفيش خطر تكرار هنا لما
+      // بنضيف snapshot.tds فوق قراءات آخر 7 أيام.
+      String? saltTrendLabel;
+      double? avgTds7Days;
+      bool? needsLeaching;
+      String? leachingMessage;
+      String? leachingAdvice;
+
+      if (mode == AppMode.agricultural) {
+        final farmProfile = context.read<FarmProfileService>().profileOrDefault;
+        final reportsHistory = context.read<ReportsService>().history;
+        final recentTds = reportsHistory
+            .where((r) => r.date.isAfter(DateTime.now().subtract(const Duration(days: 7))))
+            .map((r) => r.tds)
+            .toList()
+          ..add(snapshot.tds);
+
+        if (recentTds.length >= 3) {
+          saltTrendLabel = farmProfile.calculateSaltTrend(recentTds).label;
+          avgTds7Days = recentTds.reduce((a, b) => a + b) / recentTds.length;
+        }
+
+        final leaching = farmProfile.getLeachingRecommendation(
+          snapshot.tds,
+          soilMoisture: snapshot.purity,
+        );
+        needsLeaching = leaching.needsLeaching;
+        leachingMessage = leaching.message;
+        leachingAdvice = leaching.specificAdvice;
+      }
+
       final result = await _aiService.analyzeWaterImage(
         imageFile: image,
         tds: snapshot.tds,
@@ -96,6 +130,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         temperature: snapshot.temperature,
         ph: snapshot.ph,
         mode: mode,
+        saltTrendLabel: saltTrendLabel,
+        avgTds7Days: avgTds7Days,
+        needsLeaching: needsLeaching,
+        leachingMessage: leachingMessage,
+        leachingAdvice: leachingAdvice,
       );
       if (!mounted) return;
 
@@ -208,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final data = ble.sensorData;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final modeService = context.watch<ModeService>();
+    // final modeService = context.watch<ModeService>();
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D1117) : const Color(0xFFF4F7F6),

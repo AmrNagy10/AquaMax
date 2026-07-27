@@ -17,6 +17,13 @@ class HomePromptStrategy implements AiPromptStrategy {
     required double temperature,
     required double? ph,
     required bool hasImage, // الصورة إجبارية في Home، فمش بتغيّر الصياغة هنا
+    // ملحوظة: الـ params دي (trend/leaching) خاصة بالزراعة فقط — Home مش
+    // محتاجها، فبتتجاهل هنا عمدًا عشان نطابق الـ interface الموحّد.
+    String? saltTrendLabel,
+    double? avgTds7Days,
+    bool? needsLeaching,
+    String? leachingMessage,
+    String? leachingAdvice,
   }) {
     return """
 You are a strict, data-driven water quality expert certified under ISO 17025.

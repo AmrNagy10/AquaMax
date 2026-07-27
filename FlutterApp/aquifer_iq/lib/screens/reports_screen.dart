@@ -363,6 +363,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
         .where((r) => r.date.isAfter(DateTime.now().subtract(const Duration(days: 7))))
         .map((r) => r.tds)
         .toList();
+
+    if (recentTds.isEmpty || recentTds.last != currentTds) {
+      recentTds.add(currentTds);
+    }
+
     recentTds.add(currentTds);
     final trend = farmProfile.calculateSaltTrend(recentTds);
 
