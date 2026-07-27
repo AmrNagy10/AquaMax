@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../services/reports_service.dart';
 import '../services/mode_service.dart';
 import '../models/app_mode.dart';
+import '../models/farm_profile.dart';
+import '../services/farm_profile_service.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -66,7 +68,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSelectedReportCard(
-              selectedReport, safeIndex == 0, isDark, cardColor, textColor, subtitleColor, isAgricultural,
+              selectedReport, safeIndex == 0, isDark, cardColor, textColor, subtitleColor, isAgricultural, history,
             ),
             const SizedBox(height: 30),
             Row(
@@ -219,7 +221,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildSelectedReportCard(
       WaterAnalysisReport report, bool isLatest, bool isDark,
       Color cardColor, Color textColor, Color subtitleColor,
-      bool isAgricultural,
+      bool isAgricultural, List<WaterAnalysisReport> history,
+
       ) {
     final aiResult = report.aiResult;
     return Container(
@@ -336,6 +339,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
         // ✅ Agriculture advice only shown in Agricultural mode
         if (isAgricultural) ...[
           _buildAgricultureAdvice(report.tds, report.temperature, aiResult.isSafe, isDark),
+          // Historical Salt Trend Indicator
+          _buildSaltTrendIndicator(report.tds, history, isDark),
+          // Leaching Recommendation
+          _buildLeachingCard(report.tds, report.purity, isDark),
         ],
       ]),
     );
@@ -347,6 +354,146 @@ class _ReportsScreenState extends State<ReportsScreen> {
       const SizedBox(height: 4),
       Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF185FA5))),
     ]);
+  }
+
+  // ─── Historical Salt Trend Indicator ───
+  Widget _buildSaltTrendIndicator(double currentTds, List<WaterAnalysisReport> history, bool isDark) {
+    final farmProfile = context.watch<FarmProfileService>().profileOrDefault;
+    final recentTds = history
+        .where((r) => r.date.isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .map((r) => r.tds)
+        .toList();
+    recentTds.add(currentTds);
+    final trend = farmProfile.calculateSaltTrend(recentTds);
+
+    if (recentTds.length < 3) {
+      return Container(
+        margin: const EdgeInsets.only(top: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF64B5F6).withOpacity(isDark ? 0.1 : 0.06),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFF64B5F6).withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline_rounded, color: const Color(0xFF64B5F6), size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Not enough data for salt trend — Keep scanning to build history',
+                style: TextStyle(fontSize: 12, color: isDark ? Colors.white60 : Colors.grey[600]),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: trend.color.withOpacity(isDark ? 0.12 : 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: trend.color.withOpacity(0.3)),
+      ),
+      child: Row(
+          children: [
+          Icon(trend.icon, color: trend.color, size: 22),
+      const SizedBox(width: 10),
+      Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Text(
+            '7-Day Salt Trend',
+            style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.grey[500], fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            trend.label,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: trend.color),
+          ),
+          const SizedBox(height: 3),
+          Text(
+              'Avg: ${(recentTds.reduce((a, b) => a + b) / recentTds.length).toStringAsFixed(0)} PPM | Current: ${currentTds.toStringAsFixed(0)} PPM',
+      style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.grey[600]),
+    ),
+    ],
+    ),
+    ),
+    ],
+    ),
+    );
+  }
+
+  // ─── Leaching Recommendation Card ───
+  Widget _buildLeachingCard(double tds, double soilMoisture, bool isDark) {
+    final farmProfile = context.watch<FarmProfileService>().profileOrDefault;
+    final leaching = farmProfile.getLeachingRecommendation(tds, soilMoisture: soilMoisture);
+
+    if (!leaching.needsLeaching) {
+      return Container(
+        margin: const EdgeInsets.only(top: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF639922).withOpacity(isDark ? 0.1 : 0.06),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFF639922).withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle_outline_rounded, color: const Color(0xFF639922), size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                leaching.message,
+                style: TextStyle(fontSize: 12, color: const Color(0xFF639922), fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: leaching.color.withOpacity(isDark ? 0.12 : 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: leaching.color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.water_drop_rounded, color: leaching.color, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  leaching.message,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: leaching.color),
+                ),
+              ),
+            ],
+          ),
+          if (leaching.specificAdvice != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              leaching.specificAdvice!,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white60 : Colors.grey[700],
+                height: 1.5,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Widget _buildInteractiveBarChart(List<WaterAnalysisReport> history, int selectedIndex) {

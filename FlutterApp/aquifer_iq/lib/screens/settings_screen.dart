@@ -7,6 +7,7 @@ import '../services/reports_service.dart';
 import '../services/farm_profile_service.dart';
 import '../widgets/farm_profile_setup_sheet.dart';
 import '../models/app_mode.dart';
+import '../models/farm_profile.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -68,6 +69,14 @@ class SettingsScreen extends StatelessWidget {
                 Divider(height: 1, color: dividerColor),
                 _buildModeSelectorTile(
                   context: context, // ✅ Added context parameter
+                  modeService: modeService,
+                  iconBg: iconBg,
+                  textColor: textColor,
+                  subtitleColor: subtitleColor,
+                ),
+                Divider(height: 1, color: dividerColor),
+                _buildFarmProfileTile(
+                  context: context,
                   modeService: modeService,
                   iconBg: iconBg,
                   textColor: textColor,
@@ -311,6 +320,60 @@ class SettingsScreen extends StatelessWidget {
             activeColor: const Color(0xFF185FA5),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Farm Profile Tile ──
+  Widget _buildFarmProfileTile({
+    required BuildContext context,
+    required ModeService modeService,
+    required Color iconBg,
+    required Color textColor,
+    required Color subtitleColor,
+  }) {
+    final profile = context.watch<FarmProfileService>().profileOrDefault;
+    final subtitle = modeService.currentMode == AppMode.agricultural
+        ? "${profile.cropType.label} · ${profile.soilType.label}"
+        : "Available in Agricultural mode";
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: InkWell(
+        onTap: () async {
+          await modeService.setMode(AppMode.agricultural);
+          if (context.mounted) {
+            await showFarmProfileSetupSheet(context);
+          }
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.eco_rounded, color: Color(0xFF639922), size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Farm Profile",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor),
+                  ),
+                  Text(subtitle, style: TextStyle(fontSize: 12, color: subtitleColor)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: subtitleColor, size: 20),
+          ],
+        ),
       ),
     );
   }

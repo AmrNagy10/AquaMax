@@ -17,6 +17,7 @@ import '../models/farm_profile.dart';
 import '../services/farm_profile_service.dart';
 import '../widgets/gauge_widget.dart';
 import '../widgets/farm_profile_setup_sheet.dart';
+import '../services/reports_service.dart';
 
 /// نتيجة اختيار المستخدم في وضع Agricultural: يصور ورقة، أو يكمل بالحساسات بس.
 /// null (لو الـ sheet اتقفلت من غير اختيار) = إلغاء العملية بالكامل.
@@ -402,6 +403,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(labels['dashboardTitle']!, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: textColor)),
             const SizedBox(height: 20),
 
+            // ─── Score Card ───
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -467,8 +469,210 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
+
+            // ─── Agricultural Insights Section ───
+            if (currentMode == AppMode.agricultural && connected) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Builder(
+                  builder: (context) {
+                    final soilMoisture = data.purity; // purity field = soil moisture in Ag mode
+                    final risk = farmProfile.soilRiskFor(data.tds, soilMoisture: soilMoisture);
+                    final thresholdStatus = farmProfile.getTdsThresholdStatus(data.tds);
+                    final leaching = farmProfile.getLeachingRecommendation(data.tds, soilMoisture: soilMoisture);
+
+                    // Historical Salt Trend (من التقارير المحفوظة)
+                    final reportsHistory = context.watch<ReportsService>().history;
+                    final recentTds = reportsHistory
+                        .where((r) => r.date.isAfter(DateTime.now().subtract(const Duration(days: 7))))
+                        .map((r) => r.tds)
+                        .toList();
+                    recentTds.add(data.tds); // أضف القراءة الحالية
+                    final saltTrend = farmProfile.calculateSaltTrend(recentTds);
+
+                    return Column(
+                      children: [
+                        // ─── Profile Age Warning ───
+                        if (farmProfile.isProfileStale) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF9F27).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFEF9F27).withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.schedule_rounded, color: const Color(0xFFEF9F27), size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    farmProfile.profileAgeWarning ?? '',
+                                    style: TextStyle(fontSize: 12, color: const Color(0xFFEF9F27), fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // ─── TDS Threshold Alert ───
+                        if (thresholdStatus == TdsThresholdStatus.warning || thresholdStatus == TdsThresholdStatus.critical) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: thresholdStatus.color.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: thresholdStatus.color.withOpacity(0.35)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(thresholdStatus.icon, color: thresholdStatus.color, size: 24),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'TDS ${thresholdStatus.label}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: thresholdStatus.color,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        'Current: ${data.tds.toStringAsFixed(0)} PPM | Max safe: ${farmProfile.maxTdsThreshold.toStringAsFixed(0)} PPM for ${farmProfile.cropType.label}',
+                                        style: TextStyle(fontSize: 11, color: textColor.withOpacity(0.7)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // ─── Soil Health Impact + Leaching ───
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: risk.color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: risk.color.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(risk.icon, color: risk.color, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Soil Health Impact',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: risk.color,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                risk.label,
+                                style: TextStyle(fontSize: 13, color: textColor.withOpacity(0.8)),
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Salt Trend
+                              if (recentTds.length >= 3) ...[
+                                Row(
+                                  children: [
+                                    Icon(saltTrend.icon, color: saltTrend.color, size: 16),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        saltTrend.label,
+                                        style: TextStyle(fontSize: 12, color: saltTrend.color, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+
+                              // Leaching Recommendation
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: leaching.color.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: leaching.color.withOpacity(0.2)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          leaching.needsLeaching ? Icons.water_drop_rounded : Icons.check_circle_outline_rounded,
+                                          color: leaching.color,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            leaching.message,
+                                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: leaching.color),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (leaching.specificAdvice != null) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        leaching.specificAdvice!,
+                                        style: TextStyle(fontSize: 11, color: textColor.withOpacity(0.7), height: 1.4),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+
+                              Text(
+                                '${farmProfile.cropType.label} · ${farmProfile.soilType.label} soil · Updated ${farmProfile.profileAgeInDays == 0 ? 'today' : '${farmProfile.profileAgeInDays}d ago'}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: subtitleColor,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+
             const SizedBox(height: 20),
 
+            // ─── Gauges Grid ───
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
@@ -503,65 +707,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   activeColor: ScoringEngine.getPurityColor(data.purity),
                   bgColor: gaugeBg,
                 ),
-                if (currentMode == AppMode.agricultural && connected)
-                  Builder(
-                      builder: (context) {
-                        final risk = farmProfile.soilRiskFor(data.tds);
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          margin: const EdgeInsets.only(top: 8),
-                          decoration: BoxDecoration(
-                            color: risk.color.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: risk.color.withOpacity(0.3)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: risk.color,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      "Soil Health Impact",
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: risk.color,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                risk.label,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: textColor.withOpacity(0.8),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                "Current Profile: ${farmProfile.cropType.label} in ${farmProfile.soilType.label} soil",
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: subtitleColor,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                  ),
                 GaugeWidget(
                   title: "pH Level",
                   subtitle: !connected
@@ -577,7 +722,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 GaugeWidget(
                   title: "Temperature",
-
                   subtitle: !connected
                       ? "--": currentMode == AppMode.agricultural
                       ? (data.temperature >= 10 && data.temperature <= 30 ? "Safe for Irrigation" : "Extreme for Crops")
